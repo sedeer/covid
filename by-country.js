@@ -2,7 +2,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
     var map_elem = (typeof map_target === 'string') ? map_target : "body"; // optional target HTML element
     var linear_elem = (typeof linear_target === 'string') ? linear_target : "body"; // optional target HTML element
     var log_elem = (typeof log_target === 'string') ? log_target : "body"; // optional target HTML element
-    var w = 860; // SVG width
+    var w = 900; // SVG width
     var h = 700;  // SVG height
     if (typeof width === 'number') w = width; // optional SVG width
     if (typeof height === 'number') h = height;  // optional SVG height
