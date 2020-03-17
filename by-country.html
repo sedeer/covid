@@ -7,18 +7,32 @@
     <script type="text/javascript" src="lib/d3.min.js"></script>
     <script type="text/javascript" src="lib/topojson.v1.min.js"></script>
     <script type="text/javascript" src="by-country.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet"/>
   </head>
   <body>
-  <h5>Click to add/remove a country form the graphs</h5>
-  <div id="map"></div>
-  <h6>Linear plots</h6>
-  <div id="linears"></div>
-  <h6>Log plots</h6>
-  <div id="logs"></div>
+  <div class="row"><div class="col-md-11">
+    <p class="text-center font-weight-bold">COVID-19 CASES BY COUNTRY</p>
+  </div></div>
+  
+  <div class="row">
+    <div id="map" class="col-md-5 text-center" style="margin-top: 50px;">Click on a country to add/remove it from the graphs.</div>
+    <div class="col-md-3">
+        <p class="text-center font-weight-bold">Linear plots</p>
+        <div id="linears"></div>
+    </div>
+    <div class="col-md-3">
+        <p class="text-center font-weight-bold">Log plots</p>
+        <div id="logs"></div>
+    </div>
+  </div>
+
+  <div class="row"><div class="col-md-12">
+    <p class="footer text-center font-weight-light">Data pulled from <a href="https://github.com/CSSEGISandData/COVID-19">Johns Hopkins University CSSE repo</a>. Last updated on March 17 at 13:46 UTC.</p>
+  </div></div>
+  
   <script type="text/javascript">
     drawMap("data/confirmed-and-dead.csv","#map","#linears","#logs");
   </script>
-  <p class="footer">Data pulled from <a href="https://github.com/CSSEGISandData/COVID-19">Johns Hopkins University CSSE repo</a>.</p>
-  
+
   </body>
 </html>

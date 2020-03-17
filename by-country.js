@@ -2,21 +2,26 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
     var map_elem = (typeof map_target === 'string') ? map_target : "body"; // optional target HTML element
     var linear_elem = (typeof linear_target === 'string') ? linear_target : "body"; // optional target HTML element
     var log_elem = (typeof log_target === 'string') ? log_target : "body"; // optional target HTML element
-    var w = 1000; // SVG width
+    var w = 860; // SVG width
     var h = 700;  // SVG height
     if (typeof width === 'number') w = width; // optional SVG width
     if (typeof height === 'number') h = height;  // optional SVG height
-    var margin = {top: 30, right: 10, bottom: 40, left: 50}
+    var margin = {top: 10, right: 10, bottom: 40, left: 50}
     w = w - margin.left - margin.right,
     h = h - margin.top - margin.bottom;
     var point_radius = 3;
 
+    // Parser and formatters
+    var parseDate = d3.time.format("%-m/%-d/%Y").parse;
+    var formatDate = d3.time.format("%d/%m");
+    var loglabel = d3.format(",g");
 
     // Map
     var map_svg = d3.select(map_elem)
         .append("svg")
         .attr("width",w)
         .attr("height",h)
+        .attr("class","map")
         .attr("style", "outline: thin solid lightgrey;");
 
     var g = map_svg.append("g");
@@ -46,6 +51,12 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
         .append("g")
             .attr("transform", 
                   "translate(" + margin.left + "," + margin.top + ")");
+    cases_graph.append("text")
+        .attr("class","graph_title")
+        .attr("x", (w/4))
+        .attr("y", 0 + (margin.top / 2))
+        .attr("text-anchor", "middle")
+        .text("Cases");
 
     var death_graph = d3.select(linear_elem)
         .append("svg")
@@ -54,6 +65,12 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
         .append("g")
             .attr("transform", 
                   "translate(" + margin.left + "," + margin.top + ")");
+    death_graph.append("text")
+        .attr("class","graph_title")
+        .attr("x", (w/4))
+        .attr("y", 0 + (margin.top / 2))
+        .attr("text-anchor", "middle")
+        .text("Deaths");
 
     // Log graphse
     var cases_loggraph = d3.select(log_elem)
@@ -63,6 +80,12 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
         .append("g")
             .attr("transform", 
                   "translate(" + margin.left + "," + margin.top + ")");
+    cases_loggraph.append("text")
+        .attr("class","graph_title")
+        .attr("x", (w/4))
+        .attr("y", 0 + (margin.top / 2))
+        .attr("text-anchor", "middle")
+        .text("Cases");
 
     var death_loggraph = d3.select(log_elem)
         .append("svg")
@@ -71,10 +94,12 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
         .append("g")
             .attr("transform", 
                   "translate(" + margin.left + "," + margin.top + ")");
-
-    // Date parser and formatter
-    var parseDate = d3.time.format("%-m/%-d/%Y").parse;
-    var formatDate = d3.time.format("%d/%m");
+    death_loggraph.append("text")
+        .attr("class","graph_title")
+        .attr("x", (w/4))
+        .attr("y", 0 + (margin.top / 2))
+        .attr("text-anchor", "middle")
+        .text("Deaths");
 
     // Set the ranges for the line graphs
     var x = d3.time.scale().range([0, w/2]);
@@ -94,9 +119,9 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
         .orient("left").ticks(5);
 
     var yAxis_logcounts = d3.svg.axis().scale(y_counts_log)
-        .orient("left");
+        .orient("left").ticks(10, function(d) { return loglabel(d);});
     var yAxis_logdeaths = d3.svg.axis().scale(y_deaths_log)
-        .orient("left");
+        .orient("left").ticks(10, function(d) { return loglabel(d);});
 
     // Line creators
     var countline = d3.svg.line()
