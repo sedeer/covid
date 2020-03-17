@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>World map</title>
+    <title>COVID-19 cases and deaths by country</title>
     <link rel="stylesheet" href="by-country.css">
     <script type="text/javascript" src="lib/d3.min.js"></script>
     <script type="text/javascript" src="lib/topojson.v1.min.js"></script>
@@ -15,8 +15,10 @@
   <div id="linears"></div>
   <h6>Log plots</h6>
   <div id="logs"></div>
-    <script type="text/javascript">
-      drawMap("data/confirmed-and-dead.csv","#map","#linears","#logs");
-    </script>
+  <script type="text/javascript">
+    drawMap("data/confirmed-and-dead.csv","#map","#linears","#logs");
+  </script>
+  <p class="footer">Data pulled from <a href="https://github.com/CSSEGISandData/COVID-19">Johns Hopkins University CSSE repo</a>.</p>
+  
   </body>
 </html>

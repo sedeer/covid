@@ -9,6 +9,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
     var margin = {top: 30, right: 10, bottom: 40, left: 50}
     w = w - margin.left - margin.right,
     h = h - margin.top - margin.bottom;
+    var point_radius = 3;
 
 
     // Map
@@ -71,8 +72,9 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
             .attr("transform", 
                   "translate(" + margin.left + "," + margin.top + ")");
 
-    // Date parser
+    // Date parser and formatter
     var parseDate = d3.time.format("%-m/%-d/%Y").parse;
+    var formatDate = d3.time.format("%d/%m");
 
     // Set the ranges for the line graphs
     var x = d3.time.scale().range([0, w/2]);
@@ -84,7 +86,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
     // Define the axes
     var xAxis = d3.svg.axis().scale(x)
         .orient("bottom").ticks(4)
-        .tickFormat(d3.time.format("%d/%m"));
+        .tickFormat(formatDate);
 
     var yAxis_counts = d3.svg.axis().scale(y_counts)
         .orient("left").ticks(5);
@@ -154,19 +156,19 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
                 if (index >= 0) {
                     d3.select(this).style("fill","white");
                     selected_countries.splice(index,1);
-                    d3.select("#"+countryname.replace(" ", "_")+"-count").remove();
-                    d3.select("#"+countryname.replace(" ", "_")+"-death").remove();
+                    d3.selectAll("#"+countryname.replace(" ", "_")+"-count").remove();
+                    d3.selectAll("#"+countryname.replace(" ", "_")+"-death").remove();
                     updateGraphs(d.properties)
                     recolorCountries();
                 } else {
                     if (countries_with_data.indexOf(countryname) >= 0) {
                         selected_countries.push(countryname);
-                        d3.select(this).style("fill",countrycolors(selected_countries.indexOf(countryname)));
+                        d3.select(this).style("fill",countrycolors(selected_countries.indexOf(countryname)%10));
                         updateGraphs(d.properties);
                     } else {
                         div.transition()
                             .duration(200)
-                            .style("opacity", .9);
+                            .style("opacity", 0.9);
                         div	.html("No cases reported in " + countryname)
                             .style("left", (d3.event.pageX) + "px")
                             .style("top", (d3.event.pageY - 28) + "px");
@@ -242,7 +244,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
 
             function recolorCountries() {
                 selected_countries.forEach(function (countryname) {
-                    d3.select("#"+countryname.replace(" ", "_")).style("fill",countrycolors(selected_countries.indexOf(countryname)));
+                    d3.select("#"+countryname.replace(" ", "_")).style("fill",countrycolors(selected_countries.indexOf(countryname)%10));
                 });
             }
 
@@ -270,6 +272,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
                 death_loggraph.select(".y").transition(t).call(yAxis_logdeaths);
 
                 d3.selectAll("path.line").remove(); 
+                d3.selectAll("circle").remove(); 
                 
                 /* *** Create the count graphs *** */
                 // Nest the entries by country 
@@ -282,18 +285,55 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
                     // linear
                     cases_graph.append("path")
                         .attr("class", "line")
-                        .attr("stroke",countrycolors(selected_countries.indexOf(d.key)))
+                        .attr("stroke",countrycolors(selected_countries.indexOf(d.key)%10))
                         .attr("id",d.key.replace(" ", "_")+"-count")
                         .attr("d", countline(d.values))
-                        .on("mouseover", function(d, i) { return alert("value: " + d[i].value);});
                     // log
                     cases_loggraph.append("path")
                         .attr("class", "line")
-                        .attr("stroke",countrycolors(selected_countries.indexOf(d.key)))
+                        .attr("stroke",countrycolors(selected_countries.indexOf(d.key)%10))
                         .attr("id",d.key.replace(" ", "_")+"-count")
                         .attr("d", countlogline(d.values));
 
-                    // add circles
+                    // add points
+                    d.values.forEach(function (d) {
+                        cases_graph.append("circle")
+                            .attr("r", point_radius)
+                            .attr("class", "point")
+                            .attr("fill",countrycolors(selected_countries.indexOf(d.country)%10))
+                            .attr("id",d.country.replace(" ", "_")+"-count")
+                            .attr("cx", x(d.date))
+                            .attr("cy", y_counts(d.count))
+                            .on("mouseover", function(e) {
+                                div.transition()
+                                    .duration(200)
+                                    .style("opacity", 0.9);
+                                div	.html(d.country + "<br>" + d.count + " cases"+ "<br>" + formatDate(d.date))
+                                    .style("left", (d3.event.pageX) + "px")
+                                    .style("top", (d3.event.pageY - 28) + "px");
+                                })
+                            .on("mouseout", function(d) {
+                                window.setTimeout(clearTooltip,50);
+                            });
+                        cases_loggraph.append("circle")
+                            .attr("r", point_radius)
+                            .attr("class", "point")
+                            .attr("fill",countrycolors(selected_countries.indexOf(d.country)%10))
+                            .attr("id",d.country.replace(" ", "_")+"-count")
+                            .attr("cx", x(d.date))
+                            .attr("cy", y_counts_log(d.count))
+                            .on("mouseover", function(e) {
+                                div.transition()
+                                    .duration(200)
+                                    .style("opacity", 0.9);
+                                div	.html(d.country + "<br>" + d.count + " cases"+ "<br>" + formatDate(d.date))
+                                    .style("left", (d3.event.pageX) + "px")
+                                    .style("top", (d3.event.pageY - 28) + "px");
+                                })
+                            .on("mouseout", function(d) {
+                                window.setTimeout(clearTooltip,50);
+                            });
+                    });
                 });
 
                 /* *** Create the death graphs *** */
@@ -307,17 +347,55 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
                     // linear
                     death_graph.append("path")
                         .attr("class", "line")
-                        .attr("stroke",countrycolors(selected_countries.indexOf(d.key)))
+                        .attr("stroke",countrycolors(selected_countries.indexOf(d.key)%10))
                         .attr("id",d.key.replace(" ", "_")+"-death")
                         .attr("d", deathline(d.values));
                     // log
                     death_loggraph.append("path")
                         .attr("class", "line")
-                        .attr("stroke",countrycolors(selected_countries.indexOf(d.key)))
+                        .attr("stroke",countrycolors(selected_countries.indexOf(d.key)%10))
                         .attr("id",d.key.replace(" ", "_")+"-death")
                         .attr("d", deathlogline(d.values));
 
-                    // add circles
+                    // add points
+                    d.values.forEach(function (d) {
+                        death_graph.append("circle")
+                            .attr("r", point_radius)
+                            .attr("class", "point")
+                            .attr("fill",countrycolors(selected_countries.indexOf(d.country)%10))
+                            .attr("id",d.country.replace(" ", "_")+"-death")
+                            .attr("cx", x(d.date))
+                            .attr("cy", y_deaths(d.deaths))
+                            .on("mouseover", function(e) {
+                                div.transition()
+                                    .duration(200)
+                                    .style("opacity", 0.9);
+                                div	.html(d.country + "<br>" + d.deaths + " deaths"+ "<br>" + formatDate(d.date))
+                                    .style("left", (d3.event.pageX) + "px")
+                                    .style("top", (d3.event.pageY - 28) + "px");
+                                })
+                            .on("mouseout", function(d) {
+                                window.setTimeout(clearTooltip,50);
+                            });
+                        death_loggraph.append("circle")
+                            .attr("r", point_radius)
+                            .attr("class", "point")
+                            .attr("fill",countrycolors(selected_countries.indexOf(d.country)%10))
+                            .attr("id",d.country.replace(" ", "_")+"-death")
+                            .attr("cx", x(d.date))
+                            .attr("cy", y_deaths_log(d.deaths))
+                            .on("mouseover", function(e) {
+                                div.transition()
+                                    .duration(200)
+                                    .style("opacity", 0.9);
+                                div	.html(d.country + "<br>" + d.deaths + " deaths"+ "<br>" + formatDate(d.date))
+                                    .style("left", (d3.event.pageX) + "px")
+                                    .style("top", (d3.event.pageY - 28) + "px");
+                                })
+                            .on("mouseout", function(d) {
+                                window.setTimeout(clearTooltip,50);
+                            });
+                    });
                 });
             }
 
