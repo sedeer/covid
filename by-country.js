@@ -114,6 +114,11 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
         .x(function(d) { return x(d.date); })
         .y(function(d) { return y_deaths_log(d.deaths); });
 
+    // Define the div for the tooltip
+    var div = d3.select("body").append("div")	
+        .attr("class", "tooltip")				
+        .style("opacity", 0);
+
     var countrycolors = d3.scale.category10().domain([0,9]);
 
     var selected_countries = [];
@@ -158,6 +163,14 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
                         selected_countries.push(countryname);
                         d3.select(this).style("fill",countrycolors(selected_countries.indexOf(countryname)));
                         updateGraphs(d.properties);
+                    } else {
+                        div.transition()
+                            .duration(200)
+                            .style("opacity", .9);
+                        div	.html("No cases reported in " + countryname)
+                            .style("left", (d3.event.pageX) + "px")
+                            .style("top", (d3.event.pageY - 28) + "px");
+                        window.setTimeout(clearTooltip,400);
                     }
                 }
                 });
@@ -221,6 +234,12 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
                 .attr("class", "y axis")
                 .call(yAxis_logdeaths);
 
+            function clearTooltip() {
+                div.transition()
+                    .duration(600)
+                    .style("opacity", 0);
+            }
+
             function recolorCountries() {
                 selected_countries.forEach(function (countryname) {
                     d3.select("#"+countryname.replace(" ", "_")).style("fill",countrycolors(selected_countries.indexOf(countryname)));
@@ -232,8 +251,8 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
                 countryname = clicked.name;
 
                 var dataFilter = data.filter(function(d){return selected_countries.indexOf(d.country) >= 0 })
-                var deathsFilter = dataFilter.filter(function(d){return d.deaths > 0 })
-                var countsFilter = dataFilter.filter(function(d){return d.count > 0 })
+                var deathsFilter = dataFilter.filter(function(d){return d.deaths > 0 })  // log graphs can't handle 0
+                var countsFilter = dataFilter.filter(function(d){return d.count > 0 })  // log graphs can't handle 0
 
                 var t = d3.transition().duration(750)
                 y_counts.domain([0, d3.max(countsFilter, function(d) { return d.count; })]);
@@ -252,13 +271,14 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
 
                 d3.selectAll("path.line").remove(); 
                 
+                /* *** Create the count graphs *** */
                 // Nest the entries by country 
                 var countsNest = d3.nest()
                     .key(function(d) {return d.country;})
                     .entries(countsFilter);
            
-                // add a line for each country
                 countsNest.forEach(function(d) {
+                    // line graphs
                     // linear
                     cases_graph.append("path")
                         .attr("class", "line")
@@ -266,32 +286,38 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
                         .attr("id",d.key.replace(" ", "_")+"-count")
                         .attr("d", countline(d.values))
                         .on("mouseover", function(d, i) { return alert("value: " + d[i].value);});
-
                     // log
                     cases_loggraph.append("path")
                         .attr("class", "line")
                         .attr("stroke",countrycolors(selected_countries.indexOf(d.key)))
                         .attr("id",d.key.replace(" ", "_")+"-count")
                         .attr("d", countlogline(d.values));
+
+                    // add circles
                 });
 
+                /* *** Create the death graphs *** */
                 // Nest the entries by country 
                 var deathsNest = d3.nest()
                     .key(function(d) {return d.country;})
                     .entries(deathsFilter);
            
                 deathsNest.forEach(function(d) {
+                    // line graphs
+                    // linear
                     death_graph.append("path")
                         .attr("class", "line")
                         .attr("stroke",countrycolors(selected_countries.indexOf(d.key)))
                         .attr("id",d.key.replace(" ", "_")+"-death")
                         .attr("d", deathline(d.values));
-
+                    // log
                     death_loggraph.append("path")
                         .attr("class", "line")
                         .attr("stroke",countrycolors(selected_countries.indexOf(d.key)))
                         .attr("id",d.key.replace(" ", "_")+"-death")
                         .attr("d", deathlogline(d.values));
+
+                    // add circles
                 });
             }
 
