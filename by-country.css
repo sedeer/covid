@@ -46,6 +46,12 @@ div.tooltip {
   font-size: 12px;
 }
 
+.checkbox {
+  font-family: sans-serif;
+  font-size: 12px;
+  vertical-align: middle;
+}
+
 .footer {
   font-family: sans-serif;
   font-size: 10px;
