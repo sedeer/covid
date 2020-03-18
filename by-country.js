@@ -6,7 +6,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
     var h = 700;  // SVG height
     if (typeof width === 'number') w = width; // optional SVG width
     if (typeof height === 'number') h = height;  // optional SVG height
-    var margin = {top: 10, right: 10, bottom: 40, left: 50}
+    var margin = {top: 10, right: 50, bottom: 40, left: 20}
     w = w - margin.left - margin.right,
     h = h - margin.top - margin.bottom;
     var point_radius = 3;
@@ -73,7 +73,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
         .attr("text-anchor", "middle")
         .text("Deaths");
 
-    // Log graphse
+    // Log graphs
     var cases_loggraph = d3.select(log_elem)
         .append("svg")
         .attr("width",w/2 + margin.left + margin.right)
