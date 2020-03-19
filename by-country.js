@@ -6,7 +6,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
     var h = 700;  // SVG height
     if (typeof width === 'number') w = width; // optional SVG width
     if (typeof height === 'number') h = height;  // optional SVG height
-    var margin = {top: 10, right: 50, bottom: 40, left: 20}
+    var margin = {top: 10, right: 50, bottom: 40, left: 35}
     w = w - margin.left - margin.right,
     h = h - margin.top - margin.bottom;
     var point_radius = 3;
