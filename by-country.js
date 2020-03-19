@@ -219,7 +219,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
             countries.on("click",function(d) {
                 var countryname = d.properties.name;
                 var index = selected_countries.indexOf(countryname);
-                var error_message = cases100 ? "Fewer than 100 cases in " : "No cases reported in";
+                var error_message = cases100 ? "Fewer than 100 cases in " : "No cases reported in ";
                 if (index >= 0) {
                     d3.select(this).style("fill","white");
                     selected_countries.splice(index,1);
