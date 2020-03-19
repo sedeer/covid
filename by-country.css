@@ -1,6 +1,6 @@
 .map {
-    margin-left: 15px;
-    margin-top: 5px;
+    margin-left: 35px;
+    margin-top: 45px;
 }
 
 .country{
@@ -13,6 +13,15 @@
 path { 
     stroke-width: 2;
     fill: none;
+}
+
+path.pct {
+    stroke-width: 1;
+}
+
+line.guide {
+    stroke-width: 0.5;
+    stroke-dasharray: 5,5; 
 }
 
 div.tooltip {	
@@ -34,6 +43,7 @@ div.tooltip {
   sroke-width: 1;
   shape-rendering: crispEdges;
 }
+
 
 .axis text {
   font-family: sans-serif;

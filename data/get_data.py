@@ -2,6 +2,8 @@
 
 import pandas as pd
 
+pd.set_option('use_inf_as_na', True) # don't want inf showing up when we calculate percentages
+
 # Confirmed cases
 df = pd.read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv')
 
@@ -22,6 +24,17 @@ deaths_df=pd.melt(deaths_df, id_vars=['index'], value_vars=deaths_df.keys()[1:])
 counts_df["deaths"] = deaths_df.value.tolist()
 
 # Calculate days since case 100
-counts_df["days100"]=counts_df['count'].ge(100).groupby(counts_df["country"]).cumsum().astype(int)-1
+counts_df["days100"]=counts_df['count'].ge(100).groupby(counts_df['country']).cumsum().astype(int)-1
+
+# Calculate percent changes
+counts_df['count_pct']=counts_df['count'].groupby(counts_df['country']).pct_change()*100
+counts_df['count_pct2']=counts_df['count'].groupby(counts_df['country']).pct_change(2)*100
+counts_df['deaths_pct']=counts_df['deaths'].groupby(counts_df['country']).pct_change()*100
+counts_df['deaths_pct2']=counts_df['deaths'].groupby(counts_df['country']).pct_change(2)*100
+counts_df.fillna(0, inplace=True)
+counts_df['count_pct'] = counts_df['count_pct'].map(lambda x: '%2.2f' % x)
+counts_df['count_pct2'] = counts_df['count_pct2'].map(lambda x: '%2.2f' % x)
+counts_df['deaths_pct'] = counts_df['deaths_pct'].map(lambda x: '%2.2f' % x)
+counts_df['deaths_pct2'] = counts_df['deaths_pct2'].map(lambda x: '%2.2f' % x)
 
 counts_df.to_csv("confirmed-and-dead.csv",index=False)

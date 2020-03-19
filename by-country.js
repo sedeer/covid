@@ -1,12 +1,14 @@
-var drawMap = function(dataset,map_target,linear_target,log_target,width,height) {
+var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pct2_target,width,height) {
     var map_elem = (typeof map_target === 'string') ? map_target : "body"; // optional target HTML element
     var linear_elem = (typeof linear_target === 'string') ? linear_target : "body"; // optional target HTML element
     var log_elem = (typeof log_target === 'string') ? log_target : "body"; // optional target HTML element
-    var w = 900; // SVG width
+    var pct_elem = (typeof pct_target === 'string') ? pct_target : "body"; // optional target HTML element
+    var pct2_elem = (typeof pct2_target === 'string') ? pct2_target : "body"; // optional target HTML element
+    var w = 840; // SVG width
     var h = 700;  // SVG height
     if (typeof width === 'number') w = width; // optional SVG width
     if (typeof height === 'number') h = height;  // optional SVG height
-    var margin = {top: 10, right: 50, bottom: 40, left: 35}
+    var margin = {top: 10, right: 10, bottom: 40, left: 35}
     w = w - margin.left - margin.right,
     h = h - margin.top - margin.bottom;
     var point_radius = 3;
@@ -44,61 +46,46 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
         .translate([w/2,h/2]);
     var path = d3.geo.path().projection(projection);
 
+    // Make graphs
+    function make_graph(target, group) {
+        return d3.select(target)
+            .append("svg")
+            .attr("width",w/2 + margin.left + margin.right)
+            .attr("height",h/2 + margin.top + margin.bottom)
+            .attr("class","graph " + group)
+            .append("g")
+                .attr("class","graph " + group)
+                .attr("transform", 
+                      "translate(" + margin.left + "," + margin.top + ")");
+    }
     // Line graphs
-    var cases_graph = d3.select(linear_elem)
-        .append("svg")
-        .attr("width",w/2 + margin.left + margin.right)
-        .attr("height",h/2 + margin.top + margin.bottom)
-        .append("g")
-            .attr("transform", 
-                  "translate(" + margin.left + "," + margin.top + ")");
-    cases_graph.append("text")
-        .attr("class","graph_title")
-        .attr("x", (w/4))
-        .attr("y", 0 + (margin.top / 2))
-        .attr("text-anchor", "middle")
-        .text("Cases");
+    var cases_graph = make_graph(linear_elem, "cases");
+    var death_graph = make_graph(linear_elem, "deaths");
 
-    var death_graph = d3.select(linear_elem)
-        .append("svg")
-        .attr("width",w/2 + margin.left + margin.right)
-        .attr("height",h/2 + margin.top + margin.bottom)
-        .append("g")
-            .attr("transform", 
-                  "translate(" + margin.left + "," + margin.top + ")");
-    death_graph.append("text")
-        .attr("class","graph_title")
-        .attr("x", (w/4))
-        .attr("y", 0 + (margin.top / 2))
-        .attr("text-anchor", "middle")
-        .text("Deaths");
+    // Percent graphs
+    var cases_pctgraph = make_graph(pct_elem, "cases");
+    var death_pctgraph = make_graph(pct_elem, "deaths");
+    
+    var cases_pct2graph = make_graph(pct2_elem, "cases");
+    var death_pct2graph = make_graph(pct2_elem, "deaths");
 
     // Log graphs
-    var cases_loggraph = d3.select(log_elem)
-        .append("svg")
-        .attr("width",w/2 + margin.left + margin.right)
-        .attr("height",h/2 + margin.top + margin.bottom)
-        .append("g")
-            .attr("transform", 
-                  "translate(" + margin.left + "," + margin.top + ")");
-    cases_loggraph.append("text")
+    var cases_loggraph = make_graph(log_elem, "cases")
+    var death_loggraph = make_graph(log_elem, "deaths");
+
+    // graph titles
+    d3.selectAll("svg.cases")
+        .append("text")
         .attr("class","graph_title")
         .attr("x", (w/4))
-        .attr("y", 0 + (margin.top / 2))
+        .attr("y", 5 + (margin.top / 2))
         .attr("text-anchor", "middle")
         .text("Cases");
-
-    var death_loggraph = d3.select(log_elem)
-        .append("svg")
-        .attr("width",w/2 + margin.left + margin.right)
-        .attr("height",h/2 + margin.top + margin.bottom)
-        .append("g")
-            .attr("transform", 
-                  "translate(" + margin.left + "," + margin.top + ")");
-    death_loggraph.append("text")
+    d3.selectAll("svg.deaths")
+        .append("text")
         .attr("class","graph_title")
         .attr("x", (w/4))
-        .attr("y", 0 + (margin.top / 2))
+        .attr("y", 5 + (margin.top / 2))
         .attr("text-anchor", "middle")
         .text("Deaths");
 
@@ -106,6 +93,10 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
     var x = cases100 ? d3.scale.linear().range([0, w/2]) : d3.time.scale().range([0, w/2]);
     var y_counts = d3.scale.linear().range([h/2, 0]);
     var y_deaths = d3.scale.linear().range([h/2, 0]);
+    var y_counts_pct = d3.scale.linear().range([h/2, 0]);
+    var y_deaths_pct = d3.scale.linear().range([h/2, 0]);
+    var y_counts_pct2 = d3.scale.linear().range([h/2, 0]);
+    var y_deaths_pct2 = d3.scale.linear().range([h/2, 0]);
     var y_counts_log = d3.scale.log().base(2).range([h/2, 0]);
     var y_deaths_log = d3.scale.log().base(2).range([h/2, 0]);
 
@@ -118,9 +109,19 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
     var yAxis_deaths = d3.svg.axis().scale(y_deaths)
         .orient("left").ticks(5);
 
-    var yAxis_logcounts = d3.svg.axis().scale(y_counts_log)
+    var yAxis_counts_pct = d3.svg.axis().scale(y_counts_pct)
+        .orient("left").ticks(5);
+    var yAxis_deaths_pct = d3.svg.axis().scale(y_deaths_pct)
+        .orient("left").ticks(5);
+
+    var yAxis_counts_pct2 = d3.svg.axis().scale(y_counts_pct2)
+        .orient("left").ticks(5);
+    var yAxis_deaths_pct2 = d3.svg.axis().scale(y_deaths_pct2)
+        .orient("left").ticks(5);
+
+    var yAxis_counts_log = d3.svg.axis().scale(y_counts_log)
         .orient("left").ticks(10, function(d) { return loglabel(d);});
-    var yAxis_logdeaths = d3.svg.axis().scale(y_deaths_log)
+    var yAxis_deaths_log = d3.svg.axis().scale(y_deaths_log)
         .orient("left").ticks(10, function(d) { return loglabel(d);});
 
     // Line creators
@@ -132,6 +133,18 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
         .interpolate("basis")
         .x(function(d) { return x(cases100 ? d.days100 : d.date); })
         .y(function(d) { return y_deaths(d.deaths); });
+    var countpctline = d3.svg.line()
+        .x(function(d) { return x(cases100 ? d.days100 : d.date); })
+        .y(function(d) { return y_counts_pct(d.count_pct); });
+    var deathpctline = d3.svg.line()
+        .x(function(d) { return x(cases100 ? d.days100 : d.date); })
+        .y(function(d) { return y_deaths_pct(d.deaths_pct); });
+    var countpct2line = d3.svg.line()
+        .x(function(d) { return x(cases100 ? d.days100 : d.date); })
+        .y(function(d) { return y_counts_pct2(d.count_pct2); });
+    var deathpct2line = d3.svg.line()
+        .x(function(d) { return x(cases100 ? d.days100 : d.date); })
+        .y(function(d) { return y_deaths_pct2(d.deaths_pct2); });
     var countlogline = d3.svg.line()
         .interpolate("basis")
         .x(function(d) { return x(cases100 ? d.days100 : d.date); })
@@ -158,6 +171,10 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
             d.count = +d.count;
             d.deaths = +d.deaths;
             d.days100 = +d.days100;
+            d.count_pct = +d.count_pct;
+            d.count_pct2 = +d.count_pct2;
+            d.deaths_pct = +d.deaths_pct;
+            d.deaths_pct2 = +d.deaths_pct2;
         });
         var countries_with_data = d3.map(data, function(d){return(d.country)}).keys()
 
@@ -167,19 +184,8 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
             d3.select(".checkbox").on("change",updateGraphs); // change the graphs if the checkbox is toggled
 
             // Add the X Axis
-            cases_graph.append("g")
-                .attr("class", "x axis")
-                .attr("transform", "translate(0," + h/2 + ")")
-                .call(xAxis)
-            death_graph.append("g")
-                .attr("class", "x axis")
-                .attr("transform", "translate(0," + h/2 + ")")
-                .call(xAxis)
-            cases_loggraph.append("g")
-                .attr("class", "x axis")
-                .attr("transform", "translate(0," + h/2 + ")")
-                .call(xAxis)
-            death_loggraph.append("g")
+            d3.selectAll("g.graph")
+                .append("g")
                 .attr("class", "x axis")
                 .attr("transform", "translate(0," + h/2 + ")")
                 .call(xAxis)
@@ -191,16 +197,32 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
             death_graph.append("g")
                 .attr("class", "y axis")
                 .call(yAxis_deaths);
+            cases_pctgraph.append("g")
+                .attr("class", "y axis")
+                .call(yAxis_counts_pct);
+            death_pctgraph.append("g")
+                .attr("class", "y axis")
+                .call(yAxis_deaths_pct);
+            cases_pct2graph.append("g")
+                .attr("class", "y axis")
+                .call(yAxis_counts_pct2);
+            death_pct2graph.append("g")
+                .attr("class", "y axis")
+                .call(yAxis_deaths_pct2);
             cases_loggraph.append("g")
                 .attr("class", "y axis")
-                .call(yAxis_logcounts);
+                .call(yAxis_counts_log);
             death_loggraph.append("g")
                 .attr("class", "y axis")
-                .call(yAxis_logdeaths);
+                .call(yAxis_deaths_log);
 
             // Scale the range of the data
             y_counts.domain([0, d3.max(data, function(d) { return d.count; })]);
             y_deaths.domain([0, d3.max(data, function(d) { return d.deaths; })]);
+            y_counts_pct.domain([0, d3.max(data, function(d) { return d.count_pct; })]);
+            y_deaths_pct.domain([0, d3.max(data, function(d) { return d.deaths_pct; })]);
+            y_counts_pct2.domain([0, d3.max(data, function(d) { return d.count_pct2; })]);
+            y_deaths_pct2.domain([0, d3.max(data, function(d) { return d.deaths_pct2; })]);
             y_counts_log.domain([1, d3.max(data, function(d) { return d.count; })]);
             y_deaths_log.domain([1, d3.max(data, function(d) { return d.deaths; })]);
 
@@ -292,22 +314,67 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
                 yAxis_deaths.scale(y_deaths);
                 death_graph.select(".y").transition(t).call(yAxis_deaths);
 
+                y_counts_pct.domain([0, d3.max(countsFilter, function(d) { return d.count_pct; })]);
+                yAxis_counts_pct.scale(y_counts_pct);
+                cases_pctgraph.select(".y").transition(t).call(yAxis_counts_pct);
+                y_deaths_pct.domain([0, d3.max(deathsFilter, function(d) { return d.deaths_pct; })]);
+                yAxis_deaths_pct.scale(y_deaths_pct);
+                death_pctgraph.select(".y").transition(t).call(yAxis_deaths_pct);
+
+                y_counts_pct2.domain([0, d3.max(countsFilter, function(d) { return d.count_pct2; })]);
+                yAxis_counts_pct2.scale(y_counts_pct2);
+                cases_pct2graph.select(".y").transition(t).call(yAxis_counts_pct2);
+                y_deaths_pct2.domain([0, d3.max(deathsFilter, function(d) { return d.deaths_pct2; })]);
+                yAxis_deaths_pct2.scale(y_deaths_pct2);
+                death_pct2graph.select(".y").transition(t).call(yAxis_deaths_pct2);
+
                 y_counts_log.domain([cases100 ? 100 : 1, d3.max(countsFilter, function(d) { return d.count; })]);
-                yAxis_logcounts.scale(y_counts_log);
-                cases_loggraph.select(".y").transition(t).call(yAxis_logcounts);
+                yAxis_counts_log.scale(y_counts_log);
+                cases_loggraph.select(".y").transition(t).call(yAxis_counts_log);
                 y_deaths_log.domain([1, d3.max(deathsFilter, function(d) { return d.deaths; })]);
-                yAxis_logdeaths.scale(y_deaths_log);
-                death_loggraph.select(".y").transition(t).call(yAxis_logdeaths);
+                yAxis_deaths_log.scale(y_deaths_log);
+                death_loggraph.select(".y").transition(t).call(yAxis_deaths_log);
 
                 d3.selectAll("path.line").remove(); 
+                d3.selectAll("line.guide").remove(); 
                 d3.selectAll("circle").remove(); 
+
+               // Add guide lines to pct graphs 
+               cases_pctgraph.append("line")
+                    .attr("class", "line guide")
+                    .attr("stroke", "gray")
+                    .attr("x1", 0)
+                    .attr("y1", y_counts_pct(100))
+                    .attr("x2", w/2)
+                    .attr("y2", y_counts_pct(100));
+               cases_pct2graph.append("line")
+                    .attr("class", "line guide")
+                    .attr("stroke", "gray")
+                    .attr("x1", 0)
+                    .attr("y1", y_counts_pct2(100))
+                    .attr("x2", w/2)
+                    .attr("y2", y_counts_pct2(100));
+               death_pctgraph.append("line")
+                    .attr("class", "line guide")
+                    .attr("stroke", "gray")
+                    .attr("x1", 0)
+                    .attr("y1", y_deaths_pct(100))
+                    .attr("x2", w/2)
+                    .attr("y2", y_deaths_pct(100));
+               death_pct2graph.append("line")
+                    .attr("class", "line guide")
+                    .attr("stroke", "gray")
+                    .attr("x1", 0)
+                    .attr("y1", y_deaths_pct2(100))
+                    .attr("x2", w/2)
+                    .attr("y2", y_deaths_pct2(100));
+
                 
                 /* *** Create the count graphs *** */
                 // Nest the entries by country 
                 var countsNest = d3.nest()
                     .key(function(d) {return d.country;})
                     .entries(countsFilter);
-           
                 countsNest.forEach(function(d) {
                     // line graphs
                     // linear
@@ -316,6 +383,18 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
                         .attr("stroke",countrycolors(selected_countries.indexOf(d.key)%10))
                         .attr("id",d.key.replace(" ", "_")+"-count")
                         .attr("d", countline(d.values))
+                    // pct 
+                    cases_pctgraph.append("path")
+                        .attr("class", "pct line")
+                        .attr("stroke",countrycolors(selected_countries.indexOf(d.key)%10))
+                        .attr("id",d.key.replace(" ", "_")+"-count")
+                        .attr("d", countpctline(d.values))
+                    // pct2
+                    cases_pct2graph.append("path")
+                        .attr("class", "pct line")
+                        .attr("stroke",countrycolors(selected_countries.indexOf(d.key)%10))
+                        .attr("id",d.key.replace(" ", "_")+"-count")
+                        .attr("d", countpct2line(d.values))
                     // log
                     cases_loggraph.append("path")
                         .attr("class", "line")
@@ -378,6 +457,18 @@ var drawMap = function(dataset,map_target,linear_target,log_target,width,height)
                         .attr("stroke",countrycolors(selected_countries.indexOf(d.key)%10))
                         .attr("id",d.key.replace(" ", "_")+"-death")
                         .attr("d", deathline(d.values));
+                    // pct
+                    death_pctgraph.append("path")
+                        .attr("class", "pct line")
+                        .attr("stroke",countrycolors(selected_countries.indexOf(d.key)%10))
+                        .attr("id",d.key.replace(" ", "_")+"-death")
+                        .attr("d", deathpctline(d.values));
+                    // pct2
+                    death_pct2graph.append("path")
+                        .attr("class", "pct line")
+                        .attr("stroke",countrycolors(selected_countries.indexOf(d.key)%10))
+                        .attr("id",d.key.replace(" ", "_")+"-death")
+                        .attr("d", deathpct2line(d.values));
                     // log
                     death_loggraph.append("path")
                         .attr("class", "line")
