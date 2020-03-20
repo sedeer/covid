@@ -17,9 +17,11 @@
   
 
   <div class="row">
-    <div class="col-md-10"></div>
-    <div class="col-md-2">
+    <div class="col-md-8"></div>
+    <div class="col-md-4">
         <input type="checkbox" class="checkbox"><label class="footer">Plot days after 100th case</label>
+        <input type="text" id="startdate" class="form-control-sm datesetter" placeholder="DD/MM" style="margin-top: 5px; margin-left: 30px;">
+        <button type="submit" id="datebtn" class="btn btn-secondary btn-sm datesetter">Set start date</button>
     </div>
   </div>
 
@@ -63,12 +65,20 @@
   </div>
 
   <div class="row"><div class="col-md-12">
-    <p class="footer text-center font-weight-light">Data pulled from <a href="https://github.com/CSSEGISandData/COVID-19">Johns Hopkins University CSSE repo</a>. Last updated on March 19 at 19:34 UTC.</p>
+    <p class="footer text-center font-weight-light">Data pulled from <a href="https://github.com/CSSEGISandData/COVID-19">Johns Hopkins University CSSE repo</a>. Last updated on March 20 at 10:39 UTC.</p>
   </div></div>
   </div>
 
-
-
+  <script type="text/javascript">
+    // Make the date field trigger the submit button when enter is pressed
+    var dateform = document.getElementById("startdate");
+    dateform.addEventListener("keyup", function(event) {
+      if (event.keyCode === 13) {
+        event.preventDefault();
+        document.getElementById("datebtn").click();
+      }
+    });
+  </script>
   
   <script type="text/javascript">
     drawMap("data/confirmed-and-dead.csv","#map","#linears","#logs","#pct","#pct2");

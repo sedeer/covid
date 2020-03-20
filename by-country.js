@@ -13,9 +13,11 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
     h = h - margin.top - margin.bottom;
     var point_radius = 3;
     var cases100 = d3.select(".checkbox").property("checked");
+    var start_date;
 
     // Parser and formatters
-    var parseDate = d3.time.format("%-m/%-d/%Y").parse;
+    var parseUSDate = d3.time.format("%m/%d/%y").parse;
+    var parseDate = d3.time.format("%d/%m/%y").parse;
     var formatDate = d3.time.format("%d/%m");
     var loglabel = d3.format(",g");
 
@@ -167,7 +169,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
     d3.csv(dataset, function(error,data) {
         if (error) return console.error(error);
         data.forEach(function(d) {
-            d.date = parseDate(d.date);
+            d.date = parseUSDate(d.date); 
             d.count = +d.count;
             d.deaths = +d.deaths;
             d.days100 = +d.days100;
@@ -182,6 +184,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
         d3.json("world.json", function(error,world) {
             if (error) return console.error(error);
             d3.select(".checkbox").on("change",updateGraphs); // change the graphs if the checkbox is toggled
+            document.getElementById("datebtn").onclick = updateGraphs;
 
             // Add the X Axis
             d3.selectAll("g.graph")
@@ -287,14 +290,29 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                 var dataFilter = data.filter(function(d){return selected_countries.indexOf(d.country) >= 0 })
 
                 if (cases100 == true) {
+                    // disable start date button
+                    start_date = null;
+                    document.getElementById("datebtn").disabled = true;
+                    document.getElementById("startdate").readOnly = true;
+                    // x Axis as days-since-case-100
                     dataFilter = dataFilter.filter(function(d){return d.days100 >= 0 });
                     x = d3.scale.linear().range([0, w/2]);
                     x.domain([0, d3.max(dataFilter, function(d) { return d.days100; })]);
                     xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(4);
                     d3.selectAll(".x").transition(t).call(xAxis);
                 } else {
+                    // disable start date button
+                    document.getElementById("datebtn").disabled = false;
+                    document.getElementById("startdate").readOnly = false;
+                    // Check if a start date is set
+                    start_date = d3.select("#startdate").property("value")+"/20";
+                    start_date = parseDate(start_date);
+                    if (start_date >= d3.min(data, function(d){return d.date}) && start_date <= d3.max(data, function(d){return d.date})) {
+                        dataFilter = dataFilter.filter(function(d){return d.date >= start_date })  
+                    }
+                    // Set up the x axis
                     x = d3.time.scale().range([0, w/2]);
-                    x.domain(d3.extent(data, function(d) { return d.date; }));
+                    x.domain(d3.extent(dataFilter, function(d) { return d.date; }));
                     xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(4).tickFormat(formatDate);
                     d3.selectAll(".x").transition(t).call(xAxis)
                         .selectAll("text")
@@ -303,6 +321,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                             .attr("dy", "-.35em")
                             .attr("transform", "rotate(-65)");
                 }
+
 
                 var deathsFilter = dataFilter.filter(function(d){return d.deaths > 0 })  // log graphs can't handle 0
                 var countsFilter = dataFilter.filter(function(d){return d.count > 0 })  // log graphs can't handle 0
@@ -314,17 +333,21 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                 yAxis_deaths.scale(y_deaths);
                 death_graph.select(".y").transition(t).call(yAxis_deaths);
 
-                y_counts_pct.domain([0, d3.max(countsFilter, function(d) { return d.count_pct; })]);
+                var max_count_pct = d3.max(deathsFilter, function(d) { return d.count_pct; });
+                y_counts_pct.domain([0, max_count_pct ? max_count_pct : 100 ]);
                 yAxis_counts_pct.scale(y_counts_pct);
                 cases_pctgraph.select(".y").transition(t).call(yAxis_counts_pct);
-                y_deaths_pct.domain([0, d3.max(deathsFilter, function(d) { return d.deaths_pct; })]);
+                var max_deaths_pct = d3.max(deathsFilter, function(d) { return d.deaths_pct; });
+                y_deaths_pct.domain([0, max_deaths_pct ? max_deaths_pct : 100]);
                 yAxis_deaths_pct.scale(y_deaths_pct);
                 death_pctgraph.select(".y").transition(t).call(yAxis_deaths_pct);
 
-                y_counts_pct2.domain([0, d3.max(countsFilter, function(d) { return d.count_pct2; })]);
+                var max_count_pct2 = d3.max(deathsFilter, function(d) { return d.count_pct2; });
+                y_counts_pct2.domain([0, max_count_pct2 ? max_count_pct2 : 100]);
                 yAxis_counts_pct2.scale(y_counts_pct2);
                 cases_pct2graph.select(".y").transition(t).call(yAxis_counts_pct2);
-                y_deaths_pct2.domain([0, d3.max(deathsFilter, function(d) { return d.deaths_pct2; })]);
+                var max_deaths_pct2 = d3.max(deathsFilter, function(d) { return d.deaths_pct2; });
+                y_deaths_pct2.domain([0, max_deaths_pct2 ? max_deaths_pct2 : 100]);
                 yAxis_deaths_pct2.scale(y_deaths_pct2);
                 death_pct2graph.select(".y").transition(t).call(yAxis_deaths_pct2);
 
@@ -339,7 +362,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                 d3.selectAll("line.guide").remove(); 
                 d3.selectAll("circle").remove(); 
 
-               // Add guide lines to pct graphs 
+               // Add guide lines to pct graphs
                cases_pctgraph.append("line")
                     .attr("class", "line guide")
                     .attr("stroke", "gray")
