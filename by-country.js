@@ -242,6 +242,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                 .append("title");
 
             countries.on("click",function(d) {
+                if (d3.event.defaultPrevented) return; // prevent drag from triggering click
                 var countryname = d.properties.name;
                 var index = selected_countries.indexOf(countryname);
                 var error_message = cases100 ? "Fewer than 100 cases in " : "No cases reported in ";
