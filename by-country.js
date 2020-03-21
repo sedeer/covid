@@ -239,7 +239,8 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
             countries.attr("d",path)
                 .attr("class", "country")
                 .attr("id", function (d) { return d.properties.name.replace(" ", "_")})
-                .append("title");
+                .append("title")
+                .text(function(d){return d.properties.name});
 
             countries.on("click",function(d) {
                 if (d3.event.defaultPrevented) return; // prevent drag from triggering click
