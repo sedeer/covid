@@ -6,6 +6,7 @@ pd.set_option('use_inf_as_na', True) # don't want inf showing up when we calcula
 
 # Confirmed cases
 df = pd.read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv')
+df['Country/Region'].loc[df['Province/State'] == 'Hong Kong'] = "Hong Kong"
 
 counts_df=df.drop(columns=["Province/State","Lat","Long"]).groupby(['Country/Region']).sum().transpose()
 counts_df.rename(columns={'US':'United States', 'Congo (Brazzaville)':'Congo','Congo (Kinshasa)':'Dem. Rep. Congo','Korea, South':'Korea','Taiwan*':'Taiwan','occupied Palestinian territory':'Palestine','Czechia':'Czech Rep.'}, inplace=True)
@@ -16,6 +17,7 @@ counts_df.rename(columns={'index':'date','Country/Region':'country','value':'cou
 
 # Deaths
 df = pd.read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv')
+df['Country/Region'].loc[df['Province/State'] == 'Hong Kong'] = "Hong Kong"
 
 deaths_df=df.drop(columns=["Province/State","Lat","Long"]).groupby(['Country/Region']).sum().transpose()
 deaths_df.rename(columns={'US':'United States', 'Congo (Brazzaville)':'Congo','Congo (Kinshasa)':'Dem. Rep. Congo','Korea, South':'Korea','Taiwan*':'Taiwan','occupied Palestinian territory':'Palestine','Czechia':'Czech Rep.'}, inplace=True)
