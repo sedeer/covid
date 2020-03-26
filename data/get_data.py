@@ -5,7 +5,7 @@ import pandas as pd
 pd.set_option('use_inf_as_na', True) # don't want inf showing up when we calculate percentages
 
 # Confirmed cases
-df = pd.read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv')
+df = pd.read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv')
 
 counts_df=df.drop(columns=["Province/State","Lat","Long"]).groupby(['Country/Region']).sum().transpose()
 counts_df.rename(columns={'US':'United States', 'Congo (Brazzaville)':'Congo','Congo (Kinshasa)':'Dem. Rep. Congo','Korea, South':'Korea','Taiwan*':'Taiwan','occupied Palestinian territory':'Palestine','Czechia':'Czech Rep.'}, inplace=True)
@@ -15,7 +15,7 @@ counts_df.rename(columns={'index':'date','Country/Region':'country','value':'cou
 
 
 # Deaths
-df = pd.read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv')
+df = pd.read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv')
 
 deaths_df=df.drop(columns=["Province/State","Lat","Long"]).groupby(['Country/Region']).sum().transpose()
 deaths_df.rename(columns={'US':'United States', 'Congo (Brazzaville)':'Congo','Congo (Kinshasa)':'Dem. Rep. Congo','Korea, South':'Korea','Taiwan*':'Taiwan','occupied Palestinian territory':'Palestine','Czechia':'Czech Rep.'}, inplace=True)
