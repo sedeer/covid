@@ -12,14 +12,15 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
     w = w - margin.left - margin.right,
     h = h - margin.top - margin.bottom;
     var point_radius = 3;
-    var cases100 = d3.select(".checkbox").property("checked");
+    var cases100 = d3.select("#Hdays").property("checked");
+    var per100k = d3.select("#percap").property("checked");
     var start_date;
 
     // Parser and formatters
     var parseUSDate = d3.time.format("%m/%d/%y").parse;
     var parseDate = d3.time.format("%d/%m/%y").parse;
     var formatDate = d3.time.format("%d/%m");
-    var loglabel = d3.format(",g");
+    var loglabel = d3.format(",.2r");
 
     // Map
     var map_svg = d3.select(map_elem)
@@ -104,7 +105,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
 
     // Define the axes
     var xAxis = d3.svg.axis().scale(x)
-        .orient("bottom").ticks(4);
+        .orient("bottom").ticks(6);
 
     var yAxis_counts = d3.svg.axis().scale(y_counts)
         .orient("left").ticks(5);
@@ -130,11 +131,11 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
     var countline = d3.svg.line()
         .interpolate("basis")
         .x(function(d) { return x(cases100 ? d.days100 : d.date); })
-        .y(function(d) { return y_counts(d.count); });
+        .y(function(d) { return y_counts(per100k ? d.count_100k : d.count); });
     var deathline = d3.svg.line()
         .interpolate("basis")
         .x(function(d) { return x(cases100 ? d.days100 : d.date); })
-        .y(function(d) { return y_deaths(d.deaths); });
+        .y(function(d) { return y_deaths(per100k ? d.deaths_100k : d.deaths); });
     var countpctline = d3.svg.line()
         .x(function(d) { return x(cases100 ? d.days100 : d.date); })
         .y(function(d) { return y_counts_pct(d.count_pct); });
@@ -150,11 +151,11 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
     var countlogline = d3.svg.line()
         .interpolate("basis")
         .x(function(d) { return x(cases100 ? d.days100 : d.date); })
-        .y(function(d) { return y_counts_log(d.count); });
+        .y(function(d) { return y_counts_log(per100k ? d.count_100k : d.count); });
     var deathlogline = d3.svg.line()
         .interpolate("basis")
         .x(function(d) { return x(cases100 ? d.days100 : d.date); })
-        .y(function(d) { return y_deaths_log(d.deaths); });
+        .y(function(d) { return y_deaths_log(per100k ? d.deaths_100k : d.deaths); });
 
     // Define the div for the tooltip
     var div = d3.select("body").append("div")	
@@ -173,6 +174,8 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
             d.count = +d.count;
             d.deaths = +d.deaths;
             d.days100 = +d.days100;
+            d.count_100k = +d.count_100k;
+            d.deaths_100k = +d.deaths_100k;
             d.count_pct = +d.count_pct;
             d.count_pct2 = +d.count_pct2;
             d.deaths_pct = +d.deaths_pct;
@@ -183,7 +186,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
         // Draw the map
         d3.json("world.json", function(error,world) {
             if (error) return console.error(error);
-            d3.select(".checkbox").on("change",updateGraphs); // change the graphs if the checkbox is toggled
+            d3.selectAll(".checkbox").on("change",updateGraphs); // change the graphs if the checkbox is toggled
             document.getElementById("datebtn").onclick = updateGraphs;
 
             // Add the X Axis
@@ -287,7 +290,8 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
             // Update the line graphs when a country is picked.
             function updateGraphs() {
                 var t = d3.transition().duration(750)
-                cases100 = d3.selectAll(".checkbox").property("checked");
+                cases100 = d3.select("#Hdays").property("checked");
+                per100k = d3.select("#percap").property("checked");
 
                 var dataFilter = data.filter(function(d){return selected_countries.indexOf(d.country) >= 0 })
 
@@ -300,7 +304,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                     dataFilter = dataFilter.filter(function(d){return d.days100 >= 0 });
                     x = d3.scale.linear().range([0, w/2]);
                     x.domain([0, d3.max(dataFilter, function(d) { return d.days100; })]);
-                    xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(4);
+                    xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(6);
                     d3.selectAll(".x").transition(t).call(xAxis);
                 } else {
                     // disable start date button
@@ -315,7 +319,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                     // Set up the x axis
                     x = d3.time.scale().range([0, w/2]);
                     x.domain(d3.extent(dataFilter, function(d) { return d.date; }));
-                    xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(4).tickFormat(formatDate);
+                    xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(6).tickFormat(formatDate);
                     d3.selectAll(".x").transition(t).call(xAxis)
                         .selectAll("text")
                             .style("text-anchor", "end")
@@ -328,10 +332,10 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                 var deathsFilter = dataFilter.filter(function(d){return d.deaths > 0 })  // log graphs can't handle 0
                 var countsFilter = dataFilter.filter(function(d){return d.count > 0 })  // log graphs can't handle 0
 
-                y_counts.domain([cases100 ? 100 : 0, d3.max(countsFilter, function(d) { return d.count; })]);
+                y_counts.domain([d3.min(countsFilter, function(d) { return per100k ? d.count_100k : d.count; }), d3.max(countsFilter, function(d) { return per100k ? d.count_100k : d.count; })]);
                 yAxis_counts.scale(y_counts);
                 cases_graph.select(".y").transition(t).call(yAxis_counts);
-                y_deaths.domain([0, d3.max(deathsFilter, function(d) { return d.deaths; })]);
+                y_deaths.domain([0, d3.max(deathsFilter, function(d) { return per100k ? d.deaths_100k : d.deaths; })]);
                 yAxis_deaths.scale(y_deaths);
                 death_graph.select(".y").transition(t).call(yAxis_deaths);
 
@@ -353,10 +357,10 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                 yAxis_deaths_pct2.scale(y_deaths_pct2);
                 death_pct2graph.select(".y").transition(t).call(yAxis_deaths_pct2);
 
-                y_counts_log.domain([cases100 ? 100 : 1, d3.max(countsFilter, function(d) { return d.count; })]);
+                y_counts_log.domain([d3.min(countsFilter, function(d) { return per100k ? d.count_100k : d.count; }), d3.max(countsFilter, function(d) { return per100k ? d.count_100k : d.count; })]);
                 yAxis_counts_log.scale(y_counts_log);
                 cases_loggraph.select(".y").transition(t).call(yAxis_counts_log);
-                y_deaths_log.domain([1, d3.max(deathsFilter, function(d) { return d.deaths; })]);
+                y_deaths_log.domain([d3.min(deathsFilter, function(d) { return per100k ? d.deaths_100k : d.deaths; }), d3.max(deathsFilter, function(d) { return per100k ? d.deaths_100k : d.deaths; })]);
                 yAxis_deaths_log.scale(y_deaths_log);
                 death_loggraph.select(".y").transition(t).call(yAxis_deaths_log);
 
@@ -435,12 +439,12 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                             .attr("fill",countrycolors(selected_countries.indexOf(d.country)%10))
                             .attr("id",d.country.replace(" ", "_")+"-count")
                             .attr("cx", x(cases100 ? d.days100 : d.date))
-                            .attr("cy", y_counts(d.count))
+                            .attr("cy", y_counts(per100k ? d.count_100k : d.count))
                             .on("mouseover", function(e) {
                                 div.transition()
                                     .duration(200)
                                     .style("opacity", 0.9);
-                                div	.html(d.country + "<br>" + d.count + " cases"+ "<br>" + formatDate(d.date))
+                                div	.html(d.country + "<br>" + (per100k ? loglabel(d.count_100k) + " cases per 100k" : d.count + " cases") + "<br>" + formatDate(d.date))
                                     .style("left", (d3.event.pageX) + "px")
                                     .style("top", (d3.event.pageY - 28) + "px");
                                 })
@@ -453,12 +457,12 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                             .attr("fill",countrycolors(selected_countries.indexOf(d.country)%10))
                             .attr("id",d.country.replace(" ", "_")+"-count")
                             .attr("cx", x(cases100 ? d.days100 : d.date))
-                            .attr("cy", y_counts_log(d.count))
+                            .attr("cy", y_counts_log(per100k ? d.count_100k :d.count))
                             .on("mouseover", function(e) {
                                 div.transition()
                                     .duration(200)
                                     .style("opacity", 0.9);
-                                div	.html(d.country + "<br>" + d.count + " cases"+ "<br>" + formatDate(d.date))
+                                div	.html(d.country + "<br>" + (per100k ? loglabel(d.count_100k) + " cases per 100k" : d.count + " cases") + "<br>" + formatDate(d.date))
                                     .style("left", (d3.event.pageX) + "px")
                                     .style("top", (d3.event.pageY - 28) + "px");
                                 })
@@ -509,12 +513,12 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                             .attr("fill",countrycolors(selected_countries.indexOf(d.country)%10))
                             .attr("id",d.country.replace(" ", "_")+"-death")
                             .attr("cx", x(cases100 ? d.days100 : d.date))
-                            .attr("cy", y_deaths(d.deaths))
+                            .attr("cy", y_deaths(per100k ? d.deaths_100k : d.deaths))
                             .on("mouseover", function(e) {
                                 div.transition()
                                     .duration(200)
                                     .style("opacity", 0.9);
-                                div	.html(d.country + "<br>" + d.deaths + " deaths"+ "<br>" + formatDate(d.date))
+                                div	.html(d.country + "<br>" + (per100k ? loglabel(d.deaths_100k) + " deaths per 100k" : d.deaths + " deaths") + "<br>" + formatDate(d.date))
                                     .style("left", (d3.event.pageX) + "px")
                                     .style("top", (d3.event.pageY - 28) + "px");
                                 })
@@ -527,12 +531,12 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                             .attr("fill",countrycolors(selected_countries.indexOf(d.country)%10))
                             .attr("id",d.country.replace(" ", "_")+"-death")
                             .attr("cx", x(cases100 ? d.days100 : d.date))
-                            .attr("cy", y_deaths_log(d.deaths))
+                            .attr("cy", y_deaths_log(per100k ? d.deaths_100k : d.deaths))
                             .on("mouseover", function(e) {
                                 div.transition()
                                     .duration(200)
                                     .style("opacity", 0.9);
-                                div	.html(d.country + "<br>" + d.deaths + " deaths"+ "<br>" + formatDate(d.date))
+                                div	.html(d.country + "<br>" + (per100k ? loglabel(d.deaths_100k) + " deaths per 100k" : d.deaths + " deaths") + "<br>" + formatDate(d.date))
                                     .style("left", (d3.event.pageX) + "px")
                                     .style("top", (d3.event.pageY - 28) + "px");
                                 })

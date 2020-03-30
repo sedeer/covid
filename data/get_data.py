@@ -4,6 +4,7 @@ import pandas as pd
 
 pd.set_option('use_inf_as_na', True) # don't want inf showing up when we calculate percentages
 
+
 # Confirmed cases
 df = pd.read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv')
 df['Country/Region'].loc[df['Province/State'] == 'Hong Kong'] = "Hong Kong"
@@ -13,7 +14,6 @@ counts_df.rename(columns={'US':'United States', 'Congo (Brazzaville)':'Congo','C
 counts_df.reset_index(inplace=True)
 counts_df=pd.melt(counts_df, id_vars=['index'], value_vars=counts_df.keys()[1:])
 counts_df.rename(columns={'index':'date','Country/Region':'country','value':'count'}, inplace=True)
-
 
 # Deaths
 df = pd.read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv')
@@ -27,6 +27,13 @@ counts_df["deaths"] = deaths_df.value.tolist()
 
 # Calculate days since case 100
 counts_df["days100"]=counts_df['count'].ge(100).groupby(counts_df['country']).cumsum().astype(int)-1
+
+# Get population data
+pops = pd.read_csv("populations.csv")
+counts_df = pd.merge(counts_df, pops, on="country", how="left")
+counts_df["count_100k"] = counts_df["count"].mul(100000).div(counts_df["population"]).round(4)
+counts_df["deaths_100k"] = counts_df["deaths"].mul(100000).div(counts_df["population"]).round(4)
+
 
 # Calculate percent changes
 counts_df['count_pct']=counts_df['count'].groupby(counts_df['country']).pct_change()*100
