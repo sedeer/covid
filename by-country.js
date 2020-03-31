@@ -80,14 +80,14 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
     d3.selectAll("svg.cases")
         .append("text")
         .attr("class","graph_title")
-        .attr("x", (w/4))
+        .attr("x", (w/8))
         .attr("y", 5 + (margin.top / 2))
         .attr("text-anchor", "middle")
         .text("Cases");
     d3.selectAll("svg.deaths")
         .append("text")
         .attr("class","graph_title")
-        .attr("x", (w/4))
+        .attr("x", (w/8))
         .attr("y", 5 + (margin.top / 2))
         .attr("text-anchor", "middle")
         .text("Deaths");
