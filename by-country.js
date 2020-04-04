@@ -1,9 +1,10 @@
-var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pct2_target,width,height) {
+var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pct2_target,change_target,width,height) {
     var map_elem = (typeof map_target === 'string') ? map_target : "body"; // optional target HTML element
     var linear_elem = (typeof linear_target === 'string') ? linear_target : "body"; // optional target HTML element
     var log_elem = (typeof log_target === 'string') ? log_target : "body"; // optional target HTML element
     var pct_elem = (typeof pct_target === 'string') ? pct_target : "body"; // optional target HTML element
     var pct2_elem = (typeof pct2_target === 'string') ? pct2_target : "body"; // optional target HTML element
+    var change_elem = (typeof change_target === 'string') ? change_target : "body"; // optional target HTML element
     var w = 840; // SVG width
     var h = 700;  // SVG height
     if (typeof width === 'number') w = width; // optional SVG width
@@ -61,9 +62,15 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                 .attr("transform", 
                       "translate(" + margin.left + "," + margin.top + ")");
     }
-    // Line graphs
+    // Raw count graphs
     var cases_graph = make_graph(linear_elem, "cases");
     var death_graph = make_graph(linear_elem, "deaths");
+
+    // Daily change graphs
+    var cases_chggraph = make_graph(change_elem, "cases");
+    var death_chggraph = make_graph(change_elem, "deaths");
+    cases_chggraph.attr("width",w + margin.left + margin.right);
+    death_chggraph.attr("width",w + margin.left + margin.right);
 
     // Percent graphs
     var cases_pctgraph = make_graph(pct_elem, "cases");
@@ -96,6 +103,8 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
     var x = cases100 ? d3.scale.linear().range([0, w/2]) : d3.time.scale().range([0, w/2]);
     var y_counts = d3.scale.linear().range([h/2, 0]);
     var y_deaths = d3.scale.linear().range([h/2, 0]);
+    var y_counts_chg = d3.scale.linear().range([h/2, 0]);
+    var y_deaths_chg = d3.scale.linear().range([h/2, 0]);
     var y_counts_pct = d3.scale.linear().range([h/2, 0]);
     var y_deaths_pct = d3.scale.linear().range([h/2, 0]);
     var y_counts_pct2 = d3.scale.linear().range([h/2, 0]);
@@ -110,6 +119,11 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
     var yAxis_counts = d3.svg.axis().scale(y_counts)
         .orient("left").ticks(5);
     var yAxis_deaths = d3.svg.axis().scale(y_deaths)
+        .orient("left").ticks(5);
+
+    var yAxis_counts_chg = d3.svg.axis().scale(y_counts_chg)
+        .orient("left").ticks(5);
+    var yAxis_deaths_chg = d3.svg.axis().scale(y_deaths_chg)
         .orient("left").ticks(5);
 
     var yAxis_counts_pct = d3.svg.axis().scale(y_counts_pct)
@@ -136,6 +150,14 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
         .interpolate("basis")
         .x(function(d) { return x(cases100 ? d.days100 : d.date); })
         .y(function(d) { return y_deaths(per100k ? d.deaths_100k : d.deaths); });
+    var countchgline = d3.svg.line()
+        .interpolate("cardinal")
+        .x(function(d) { return x(cases100 ? d.days100 : d.date); })
+        .y(function(d) { return y_counts_chg(d.count_change); });
+    var deathchgline = d3.svg.line()
+        .interpolate("cardinal")
+        .x(function(d) { return x(cases100 ? d.days100 : d.date); })
+        .y(function(d) { return y_deaths_chg(d.deaths_change); });
     var countpctline = d3.svg.line()
         .x(function(d) { return x(cases100 ? d.days100 : d.date); })
         .y(function(d) { return y_counts_pct(d.count_pct); });
@@ -173,6 +195,8 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
             d.date = parseUSDate(d.date); 
             d.count = +d.count;
             d.deaths = +d.deaths;
+            d.count_change = +d.count_change;
+            d.deaths_change = +d.deaths_change;
             d.days100 = +d.days100;
             d.count_100k = +d.count_100k;
             d.deaths_100k = +d.deaths_100k;
@@ -203,6 +227,12 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
             death_graph.append("g")
                 .attr("class", "y axis")
                 .call(yAxis_deaths);
+            cases_chggraph.append("g")
+                .attr("class", "y axis")
+                .call(yAxis_counts_chg);
+            death_chggraph.append("g")
+                .attr("class", "y axis")
+                .call(yAxis_deaths_chg);
             cases_pctgraph.append("g")
                 .attr("class", "y axis")
                 .call(yAxis_counts_pct);
@@ -225,6 +255,8 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
             // Scale the range of the data
             y_counts.domain([0, d3.max(data, function(d) { return d.count; })]);
             y_deaths.domain([0, d3.max(data, function(d) { return d.deaths; })]);
+            y_counts_chg.domain([0, d3.max(data, function(d) { return d.count_change; })]);
+            y_deaths_chg.domain([0, d3.max(data, function(d) { return d.deaths_change; })]);
             y_counts_pct.domain([0, d3.max(data, function(d) { return d.count_pct; })]);
             y_deaths_pct.domain([0, d3.max(data, function(d) { return d.deaths_pct; })]);
             y_counts_pct2.domain([0, d3.max(data, function(d) { return d.count_pct2; })]);
@@ -339,6 +371,13 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                 yAxis_deaths.scale(y_deaths);
                 death_graph.select(".y").transition(t).call(yAxis_deaths);
 
+                y_counts_chg.domain([0, d3.max(countsFilter, function(d) { return d.count_change; })]);
+                yAxis_counts_chg.scale(y_counts_chg);
+                y_deaths_chg.domain([0, d3.max(deathsFilter, function(d) { return d.deaths_change; })]);
+                yAxis_deaths_chg.scale(y_deaths_chg);
+                cases_chggraph.select(".y").transition(t).call(yAxis_counts_chg);
+                death_chggraph.select(".y").transition(t).call(yAxis_deaths_chg);
+
                 var max_count_pct = d3.max(deathsFilter, function(d) { return d.count_pct; });
                 y_counts_pct.domain([0, max_count_pct ? max_count_pct : 100 ]);
                 yAxis_counts_pct.scale(y_counts_pct);
@@ -369,6 +408,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                 d3.selectAll("circle").remove(); 
 
                // Add guide lines to pct graphs
+               // 100%
                cases_pctgraph.append("line")
                     .attr("class", "line guide")
                     .attr("stroke", "gray")
@@ -397,6 +437,35 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                     .attr("y1", y_deaths_pct2(100))
                     .attr("x2", w/2)
                     .attr("y2", y_deaths_pct2(100));
+               // 33%
+               cases_pctgraph.append("line")
+                    .attr("class", "line guide")
+                    .attr("stroke", "gray")
+                    .attr("x1", 0)
+                    .attr("y1", y_counts_pct(33))
+                    .attr("x2", w/2)
+                    .attr("y2", y_counts_pct(33));
+               cases_pct2graph.append("line")
+                    .attr("class", "line guide")
+                    .attr("stroke", "gray")
+                    .attr("x1", 0)
+                    .attr("y1", y_counts_pct2(33))
+                    .attr("x2", w/2)
+                    .attr("y2", y_counts_pct2(33));
+               death_pctgraph.append("line")
+                    .attr("class", "line guide")
+                    .attr("stroke", "gray")
+                    .attr("x1", 0)
+                    .attr("y1", y_deaths_pct(33))
+                    .attr("x2", w/2)
+                    .attr("y2", y_deaths_pct(33));
+               death_pct2graph.append("line")
+                    .attr("class", "line guide")
+                    .attr("stroke", "gray")
+                    .attr("x1", 0)
+                    .attr("y1", y_deaths_pct2(33))
+                    .attr("x2", w/2)
+                    .attr("y2", y_deaths_pct2(33));
 
                 
                 /* *** Create the count graphs *** */
@@ -406,12 +475,18 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                     .entries(countsFilter);
                 countsNest.forEach(function(d) {
                     // line graphs
-                    // linear
+                    // number
                     cases_graph.append("path")
                         .attr("class", "line")
                         .attr("stroke",countrycolors(selected_countries.indexOf(d.key)%10))
                         .attr("id",d.key.replace(" ", "_")+"-count")
                         .attr("d", countline(d.values))
+                    // daily change
+                    cases_chggraph.append("path")
+                        .attr("class", "line")
+                        .attr("stroke",countrycolors(selected_countries.indexOf(d.key)%10))
+                        .attr("id",d.key.replace(" ", "_")+"-count")
+                        .attr("d", countchgline(d.values))
                     // pct 
                     cases_pctgraph.append("path")
                         .attr("class", "pct line")
@@ -451,6 +526,24 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                             .on("mouseout", function(d) {
                                 window.setTimeout(clearTooltip,50);
                             });
+                        cases_chggraph.append("circle")
+                            .attr("r", point_radius)
+                            .attr("class", "point")
+                            .attr("fill",countrycolors(selected_countries.indexOf(d.country)%10))
+                            .attr("id",d.country.replace(" ", "_")+"-count")
+                            .attr("cx", x(cases100 ? d.days100 : d.date))
+                            .attr("cy", y_counts_chg(d.count_change))
+                            .on("mouseover", function(e) {
+                                div.transition()
+                                    .duration(200)
+                                    .style("opacity", 0.9);
+                                div	.html(d.country + "<br>" + d.count_change + " more cases on" + "<br>" + formatDate(d.date))
+                                    .style("left", (d3.event.pageX) + "px")
+                                    .style("top", (d3.event.pageY - 28) + "px");
+                                })
+                            .on("mouseout", function(d) {
+                                window.setTimeout(clearTooltip,50);
+                            });
                         cases_loggraph.append("circle")
                             .attr("r", point_radius)
                             .attr("class", "point")
@@ -480,12 +573,18 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
            
                 deathsNest.forEach(function(d) {
                     // line graphs
-                    // linear
+                    // number 
                     death_graph.append("path")
                         .attr("class", "line")
                         .attr("stroke",countrycolors(selected_countries.indexOf(d.key)%10))
                         .attr("id",d.key.replace(" ", "_")+"-death")
                         .attr("d", deathline(d.values));
+                    // change
+                    death_chggraph.append("path")
+                        .attr("class", "line")
+                        .attr("stroke",countrycolors(selected_countries.indexOf(d.key)%10))
+                        .attr("id",d.key.replace(" ", "_")+"-death")
+                        .attr("d", deathchgline(d.values));
                     // pct
                     death_pctgraph.append("path")
                         .attr("class", "pct line")
@@ -519,6 +618,24 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                                     .duration(200)
                                     .style("opacity", 0.9);
                                 div	.html(d.country + "<br>" + (per100k ? loglabel(d.deaths_100k) + " deaths per 100k" : d.deaths + " deaths") + "<br>" + formatDate(d.date))
+                                    .style("left", (d3.event.pageX) + "px")
+                                    .style("top", (d3.event.pageY - 28) + "px");
+                                })
+                            .on("mouseout", function(d) {
+                                window.setTimeout(clearTooltip,50);
+                            });
+                        death_chggraph.append("circle")
+                            .attr("r", point_radius)
+                            .attr("class", "point")
+                            .attr("fill",countrycolors(selected_countries.indexOf(d.country)%10))
+                            .attr("id",d.country.replace(" ", "_")+"-death")
+                            .attr("cx", x(cases100 ? d.days100 : d.date))
+                            .attr("cy", y_deaths_chg(d.deaths_change))
+                            .on("mouseover", function(e) {
+                                div.transition()
+                                    .duration(200)
+                                    .style("opacity", 0.9);
+                                div	.html(d.country + "<br>" + d.deaths_change + " more deaths on" + "<br>" + formatDate(d.date))
                                     .style("left", (d3.event.pageX) + "px")
                                     .style("top", (d3.event.pageY - 28) + "px");
                                 })

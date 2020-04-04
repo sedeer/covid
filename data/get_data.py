@@ -34,7 +34,6 @@ counts_df = pd.merge(counts_df, pops, on="country", how="left")
 counts_df["count_100k"] = counts_df["count"].mul(100000).div(counts_df["population"]).round(4)
 counts_df["deaths_100k"] = counts_df["deaths"].mul(100000).div(counts_df["population"]).round(4)
 
-
 # Calculate percent changes
 counts_df['count_pct']=counts_df['count'].groupby(counts_df['country']).pct_change()*100
 counts_df['count_pct2']=counts_df['count'].groupby(counts_df['country']).pct_change(2)*100
@@ -45,5 +44,9 @@ counts_df['count_pct'] = counts_df['count_pct'].map(lambda x: '%2.2f' % x)
 counts_df['count_pct2'] = counts_df['count_pct2'].map(lambda x: '%2.2f' % x)
 counts_df['deaths_pct'] = counts_df['deaths_pct'].map(lambda x: '%2.2f' % x)
 counts_df['deaths_pct2'] = counts_df['deaths_pct2'].map(lambda x: '%2.2f' % x)
+
+# Calculate change since previous day
+counts_df['count_change']=counts_df['count'].groupby(counts_df['country']).diff()
+counts_df['deaths_change']=counts_df['deaths'].groupby(counts_df['country']).diff()
 
 counts_df.to_csv("confirmed-and-dead.csv",index=False)
