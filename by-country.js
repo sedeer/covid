@@ -427,64 +427,39 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                 d3.selectAll("circle").remove(); 
 
                // Add guide lines to pct graphs
-               // 100%
-               cases_pctgraph.append("line")
-                    .attr("class", "line guide")
-                    .attr("stroke", "gray")
-                    .attr("x1", 0)
-                    .attr("y1", y_counts_pct(100))
-                    .attr("x2", w/2)
-                    .attr("y2", y_counts_pct(100));
-               cases_pct2graph.append("line")
-                    .attr("class", "line guide")
-                    .attr("stroke", "gray")
-                    .attr("x1", 0)
-                    .attr("y1", y_counts_pct2(100))
-                    .attr("x2", w/2)
-                    .attr("y2", y_counts_pct2(100));
-               death_pctgraph.append("line")
-                    .attr("class", "line guide")
-                    .attr("stroke", "gray")
-                    .attr("x1", 0)
-                    .attr("y1", y_deaths_pct(100))
-                    .attr("x2", w/2)
-                    .attr("y2", y_deaths_pct(100));
-               death_pct2graph.append("line")
-                    .attr("class", "line guide")
-                    .attr("stroke", "gray")
-                    .attr("x1", 0)
-                    .attr("y1", y_deaths_pct2(100))
-                    .attr("x2", w/2)
-                    .attr("y2", y_deaths_pct2(100));
-               // 33%
-               cases_pctgraph.append("line")
-                    .attr("class", "line guide")
-                    .attr("stroke", "gray")
-                    .attr("x1", 0)
-                    .attr("y1", y_counts_pct(33))
-                    .attr("x2", w/2)
-                    .attr("y2", y_counts_pct(33));
-               cases_pct2graph.append("line")
-                    .attr("class", "line guide")
-                    .attr("stroke", "gray")
-                    .attr("x1", 0)
-                    .attr("y1", y_counts_pct2(33))
-                    .attr("x2", w/2)
-                    .attr("y2", y_counts_pct2(33));
-               death_pctgraph.append("line")
-                    .attr("class", "line guide")
-                    .attr("stroke", "gray")
-                    .attr("x1", 0)
-                    .attr("y1", y_deaths_pct(33))
-                    .attr("x2", w/2)
-                    .attr("y2", y_deaths_pct(33));
-               death_pct2graph.append("line")
-                    .attr("class", "line guide")
-                    .attr("stroke", "gray")
-                    .attr("x1", 0)
-                    .attr("y1", y_deaths_pct2(33))
-                    .attr("x2", w/2)
-                    .attr("y2", y_deaths_pct2(33));
+               function pct_guidline(percent) {
+                   cases_pctgraph.append("line")
+                        .attr("class", "line guide")
+                        .attr("stroke", "gray")
+                        .attr("x1", 0)
+                        .attr("y1", y_counts_pct(percent))
+                        .attr("x2", w/2)
+                        .attr("y2", y_counts_pct(percent));
+                   cases_pct2graph.append("line")
+                        .attr("class", "line guide")
+                        .attr("stroke", "gray")
+                        .attr("x1", 0)
+                        .attr("y1", y_counts_pct2(percent))
+                        .attr("x2", w/2)
+                        .attr("y2", y_counts_pct2(percent));
+                   death_pctgraph.append("line")
+                        .attr("class", "line guide")
+                        .attr("stroke", "gray")
+                        .attr("x1", 0)
+                        .attr("y1", y_deaths_pct(percent))
+                        .attr("x2", w/2)
+                        .attr("y2", y_deaths_pct(percent));
+                   death_pct2graph.append("line")
+                        .attr("class", "line guide")
+                        .attr("stroke", "gray")
+                        .attr("x1", 0)
+                        .attr("y1", y_deaths_pct2(percent))
+                        .attr("x2", w/2)
+                        .attr("y2", y_deaths_pct2(percent));
+               }
+               pct_guidline(100);  // daily double
+               pct_guidline(41.4); // two days
+               pct_guidline(26);   // three days
 
                 
                 /* *** Create the count graphs *** */
