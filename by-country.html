@@ -56,8 +56,11 @@
               </div>
               <div class="tab-pane fade" id="dailychange" aria-labelledby="chg-tab" role="tabpanel">
                     <div class="row">
-                    <div id="change" class="col-md-12" >
+                    <div id="change" class="col-md-6" >
                     <p class="text-center font-weight-bold">Daily change</p>
+                    </div>
+                    <div id="avgchange" class="col-md-6" >
+                    <p class="text-center font-weight-bold">Rolling 4-day average</p>
                     </div>
                     </div>
               </div>
@@ -76,7 +79,7 @@
   </div>
 
   <div class="row"><div class="col-md-12">
-    <p class="footer text-center font-weight-light">Data pulled from <a href="https://github.com/CSSEGISandData/COVID-19">Johns Hopkins University CSSE repo</a>. Country populations from <a href="https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population">Wikipedia</a>. Code available on <a href="https://github.com/sedeer/covid/tree/master">Github</a>.<br />Feel free to reuse the graphs, but note that JHU provides the data "strictly for academic and research purposes."<br />Last updated on April 4 at 08:27 UTC.</p>
+    <p class="footer text-center font-weight-light">Data pulled from <a href="https://github.com/CSSEGISandData/COVID-19">Johns Hopkins University CSSE repo</a>. Country populations from <a href="https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population">Wikipedia</a>. Code available on <a href="https://github.com/sedeer/covid/tree/master">Github</a>.<br />Feel free to reuse the graphs, but note that JHU provides the data "strictly for academic and research purposes."<br />Last updated on April 5 at 05:01 UTC.</p>
   </div></div>
   </div>
 
@@ -92,7 +95,7 @@
   </script>
   
   <script type="text/javascript">
-    drawMap("data/confirmed-and-dead.csv","#map","#linears","#logs","#pct","#pct2","#change");
+    drawMap("data/confirmed-and-dead.csv","#map","#linears","#logs","#pct","#pct2","#change","#avgchange");
   </script>
 
   <!-- Google Analytics tracking code -->

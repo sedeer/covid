@@ -1,10 +1,11 @@
-var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pct2_target,change_target,width,height) {
+var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pct2_target,change_target,change3_target,width,height) {
     var map_elem = (typeof map_target === 'string') ? map_target : "body"; // optional target HTML element
     var linear_elem = (typeof linear_target === 'string') ? linear_target : "body"; // optional target HTML element
     var log_elem = (typeof log_target === 'string') ? log_target : "body"; // optional target HTML element
     var pct_elem = (typeof pct_target === 'string') ? pct_target : "body"; // optional target HTML element
     var pct2_elem = (typeof pct2_target === 'string') ? pct2_target : "body"; // optional target HTML element
     var change_elem = (typeof change_target === 'string') ? change_target : "body"; // optional target HTML element
+    var change3_elem = (typeof change3_target === 'string') ? change3_target : "body"; // optional target HTML element
     var w = 840; // SVG width
     var h = 700;  // SVG height
     if (typeof width === 'number') w = width; // optional SVG width
@@ -66,11 +67,16 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
     var cases_graph = make_graph(linear_elem, "cases");
     var death_graph = make_graph(linear_elem, "deaths");
 
+    // Log graphs
+    var cases_loggraph = make_graph(log_elem, "cases")
+    var death_loggraph = make_graph(log_elem, "deaths");
+
     // Daily change graphs
     var cases_chggraph = make_graph(change_elem, "cases");
     var death_chggraph = make_graph(change_elem, "deaths");
-    cases_chggraph.attr("width",w + margin.left + margin.right);
-    death_chggraph.attr("width",w + margin.left + margin.right);
+    // rolling
+    var cases_chg4graph = make_graph(change3_elem, "cases");
+    var death_chg4graph = make_graph(change3_elem, "deaths");
 
     // Percent graphs
     var cases_pctgraph = make_graph(pct_elem, "cases");
@@ -79,9 +85,6 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
     var cases_pct2graph = make_graph(pct2_elem, "cases");
     var death_pct2graph = make_graph(pct2_elem, "deaths");
 
-    // Log graphs
-    var cases_loggraph = make_graph(log_elem, "cases")
-    var death_loggraph = make_graph(log_elem, "deaths");
 
     // graph titles
     d3.selectAll("svg.cases")
@@ -158,6 +161,14 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
         .interpolate("cardinal")
         .x(function(d) { return x(cases100 ? d.days100 : d.date); })
         .y(function(d) { return y_deaths_chg(d.deaths_change); });
+    var countchg4line = d3.svg.line()
+        .interpolate("cardinal")
+        .x(function(d) { return x(cases100 ? d.days100 : d.date); })
+        .y(function(d) { return y_counts_chg(d.count_change_avg); });
+    var deathchg4line = d3.svg.line()
+        .interpolate("cardinal")
+        .x(function(d) { return x(cases100 ? d.days100 : d.date); })
+        .y(function(d) { return y_deaths_chg(d.deaths_change_avg); });
     var countpctline = d3.svg.line()
         .x(function(d) { return x(cases100 ? d.days100 : d.date); })
         .y(function(d) { return y_counts_pct(d.count_pct); });
@@ -231,6 +242,12 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                 .attr("class", "y axis")
                 .call(yAxis_counts_chg);
             death_chggraph.append("g")
+                .attr("class", "y axis")
+                .call(yAxis_deaths_chg);
+            cases_chg4graph.append("g")
+                .attr("class", "y axis")
+                .call(yAxis_counts_chg);
+            death_chg4graph.append("g")
                 .attr("class", "y axis")
                 .call(yAxis_deaths_chg);
             cases_pctgraph.append("g")
@@ -377,6 +394,8 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                 yAxis_deaths_chg.scale(y_deaths_chg);
                 cases_chggraph.select(".y").transition(t).call(yAxis_counts_chg);
                 death_chggraph.select(".y").transition(t).call(yAxis_deaths_chg);
+                cases_chg4graph.select(".y").transition(t).call(yAxis_counts_chg);
+                death_chg4graph.select(".y").transition(t).call(yAxis_deaths_chg);
 
                 var max_count_pct = d3.max(deathsFilter, function(d) { return d.count_pct; });
                 y_counts_pct.domain([0, max_count_pct ? max_count_pct : 100 ]);
@@ -487,6 +506,12 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                         .attr("stroke",countrycolors(selected_countries.indexOf(d.key)%10))
                         .attr("id",d.key.replace(" ", "_")+"-count")
                         .attr("d", countchgline(d.values))
+                    // rolling change
+                    cases_chg4graph.append("path")
+                        .attr("class", "line")
+                        .attr("stroke",countrycolors(selected_countries.indexOf(d.key)%10))
+                        .attr("id",d.key.replace(" ", "_")+"-count")
+                        .attr("d", countchg4line(d.values))
                     // pct 
                     cases_pctgraph.append("path")
                         .attr("class", "pct line")
@@ -585,6 +610,12 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                         .attr("stroke",countrycolors(selected_countries.indexOf(d.key)%10))
                         .attr("id",d.key.replace(" ", "_")+"-death")
                         .attr("d", deathchgline(d.values));
+                    // rolling change
+                    death_chg4graph.append("path")
+                        .attr("class", "line")
+                        .attr("stroke",countrycolors(selected_countries.indexOf(d.key)%10))
+                        .attr("id",d.key.replace(" ", "_")+"-death")
+                        .attr("d", deathchg4line(d.values));
                     // pct
                     death_pctgraph.append("path")
                         .attr("class", "pct line")

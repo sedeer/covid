@@ -47,6 +47,8 @@ counts_df['deaths_pct2'] = counts_df['deaths_pct2'].map(lambda x: '%2.2f' % x)
 
 # Calculate change since previous day
 counts_df['count_change']=counts_df['count'].groupby(counts_df['country']).diff()
+counts_df['count_change_avg']=counts_df['count_change'].rolling(4).mean()
 counts_df['deaths_change']=counts_df['deaths'].groupby(counts_df['country']).diff()
+counts_df['deaths_change_avg']=counts_df['deaths_change'].rolling(4).mean()
 
 counts_df.to_csv("confirmed-and-dead.csv",index=False)
