@@ -2,8 +2,6 @@
 
 ./get_data.py
 
-YESTERDAY=`date -d yesterday "+%B %d"`
-NOW=`date "+%B %d at %R %Z"`
-ZONE=`date "+%Z"`
+NOW=`date -u "+%B %d at %R UTC"`
 
-sed -i "s/$YESTERDAY.*$ZONE/$NOW/" ../by-country.html
+sed -i "s/updated on .*UTC/updated on $NOW/" ../by-country.html
