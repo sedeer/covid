@@ -32,25 +32,27 @@ counts_df["count_100k"] = counts_df["count"].mul(100000).div(counts_df["populati
 counts_df["deaths_100k"] = counts_df["deaths"].mul(100000).div(counts_df["population"]).round(4)
 
 pd.set_option('use_inf_as_na', True) # don't want inf showing up when we calculate percentages
-# Calculate percent changes
-counts_df['count_pct']=counts_df['count'].groupby(counts_df['country']).pct_change()*100
-counts_df['count_pct2']=counts_df['count'].groupby(counts_df['country']).pct_change(2)*100
-counts_df['count_pct4']=counts_df['count_pct'].rolling(4).mean()
-counts_df['deaths_pct']=counts_df['deaths'].groupby(counts_df['country']).pct_change()*100
-counts_df['deaths_pct2']=counts_df['deaths'].groupby(counts_df['country']).pct_change(2)*100
-counts_df['deaths_pct4']=counts_df['deaths_pct'].rolling(4).mean()
-counts_df.fillna(0, inplace=True)
-counts_df['count_pct'] = counts_df['count_pct'].map(lambda x: '%2.2f' % x)
-counts_df['count_pct2'] = counts_df['count_pct2'].map(lambda x: '%2.2f' % x)
-counts_df['count_pct4'] = counts_df['count_pct4'].map(lambda x: '%2.2f' % x)
-counts_df['deaths_pct'] = counts_df['deaths_pct'].map(lambda x: '%2.2f' % x)
-counts_df['deaths_pct2'] = counts_df['deaths_pct2'].map(lambda x: '%2.2f' % x)
-counts_df['deaths_pct4'] = counts_df['deaths_pct4'].map(lambda x: '%2.2f' % x)
-
 # Calculate change since previous day
 counts_df['count_change']=counts_df['count'].groupby(counts_df['country']).diff()
 counts_df['count_change_avg']=counts_df['count_change'].rolling(4).mean()
 counts_df['deaths_change']=counts_df['deaths'].groupby(counts_df['country']).diff()
 counts_df['deaths_change_avg']=counts_df['deaths_change'].rolling(4).mean()
+
+# Calculate percent changes
+counts_df['count_pct']=counts_df['count_change'].groupby(counts_df['country']).pct_change()*100
+counts_df['count_pct4']=counts_df['count_change'].groupby(counts_df['country']).pct_change(4)*100
+#counts_df['count_pct2']=counts_df['count'].groupby(counts_df['country']).pct_change(2)*100
+#counts_df['count_pct4']=counts_df['count_pct'].rolling(4).mean()
+counts_df['deaths_pct']=counts_df['deaths_change'].groupby(counts_df['country']).pct_change()*100
+counts_df['deaths_pct4']=counts_df['deaths_change'].groupby(counts_df['country']).pct_change(4)*100
+#counts_df['deaths_pct2']=counts_df['deaths'].groupby(counts_df['country']).pct_change(2)*100
+#counts_df['deaths_pct4']=counts_df['deaths_pct'].rolling(4).mean()
+counts_df.fillna(0, inplace=True)
+counts_df['count_pct'] = counts_df['count_pct'].map(lambda x: '%2.2f' % x)
+#counts_df['count_pct2'] = counts_df['count_pct2'].map(lambda x: '%2.2f' % x)
+counts_df['count_pct4'] = counts_df['count_pct4'].map(lambda x: '%2.2f' % x)
+counts_df['deaths_pct'] = counts_df['deaths_pct'].map(lambda x: '%2.2f' % x)
+#counts_df['deaths_pct2'] = counts_df['deaths_pct2'].map(lambda x: '%2.2f' % x)
+counts_df['deaths_pct4'] = counts_df['deaths_pct4'].map(lambda x: '%2.2f' % x)
 
 counts_df.to_csv("confirmed-and-dead.csv",index=False)
