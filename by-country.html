@@ -17,12 +17,13 @@
   
 
   <div class="row">
-    <div class="col-md-8"></div>
-    <div class="col-md-4">
-        <input type="checkbox" class="checkbox" id="percap"><label class="footer">Plot per 100k people</label>
-        <input type="checkbox" class="checkbox" id="Hdays"><label class="footer">Plot days after 100th case</label>
-        <input type="text" id="startdate" class="form-control-sm datesetter" placeholder="DD/MM" style="margin-top: 5px; margin-left: 30px;">
-        <button type="submit" id="datebtn" class="btn btn-secondary btn-sm datesetter">Set start date</button>
+    <div class="col-md-7"></div>
+    <div class="col-md-5">
+        <input type="checkbox" class="checkbox" id="percap"><label class="footer">Per 100k people</label>
+        <input type="checkbox" class="checkbox" id="Hdays"><label class="footer">Days after 100th case</label>
+        <input type="text" id="startdate" class="form-control-sm datesetter col-2" placeholder="DD/MM (start)" style="margin-top: 5px; margin-left: 30px;">
+        <input type="text" id="enddate" class="form-control-sm datesetter col-2" placeholder="DD/MM (end)" style="margin-top: 5px; margin-left: 30px;">
+        <button type="submit" id="datebtn" class="btn btn-secondary btn-sm datesetter">Set date range</button>
     </div>
   </div>
 

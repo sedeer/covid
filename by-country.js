@@ -16,7 +16,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
     var point_radius = 3;
     var cases100 = d3.select("#Hdays").property("checked");
     var per100k = d3.select("#percap").property("checked");
-    var start_date;
+    var start_date, end_date;
 
     // Parser and formatters
     var parseUSDate = d3.time.format("%m/%d/%y").parse;
@@ -347,10 +347,12 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                 var dataFilter = data.filter(function(d){return selected_countries.indexOf(d.country) >= 0 })
 
                 if (cases100 == true) {
-                    // disable start date button
+                    // disable date range button
                     start_date = null;
+                    end_date = null;
                     document.getElementById("datebtn").disabled = true;
                     document.getElementById("startdate").readOnly = true;
+                    document.getElementById("enddate").readOnly = true;
                     // x Axis as days-since-case-100
                     dataFilter = dataFilter.filter(function(d){return d.days100 >= 0 });
                     x = d3.scale.linear().range([0, w/2]);
@@ -364,8 +366,13 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                     // Check if a start date is set
                     start_date = d3.select("#startdate").property("value")+"/20";
                     start_date = parseDate(start_date);
+                    end_date = d3.select("#enddate").property("value")+"/20";
+                    end_date = parseDate(end_date);
                     if (start_date >= d3.min(data, function(d){return d.date}) && start_date <= d3.max(data, function(d){return d.date})) {
                         dataFilter = dataFilter.filter(function(d){return d.date >= start_date })  
+                    }
+                    if (end_date > start_date && end_date >= d3.min(data, function(d){return d.date}) && end_date <= d3.max(data, function(d){return d.date})) {
+                        dataFilter = dataFilter.filter(function(d){return d.date <= end_date })  
                     }
                     // Set up the x axis
                     x = d3.time.scale().range([0, w/2]);
