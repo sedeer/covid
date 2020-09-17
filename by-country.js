@@ -225,6 +225,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
             if (error) return console.error(error);
             d3.selectAll(".checkbox").on("change",updateGraphs); // change the graphs if the checkbox is toggled
             document.getElementById("datebtn").onclick = updateGraphs;
+            document.getElementById("resetbtn").onclick = resetButtons;
 
             // Add the X Axis
             d3.selectAll("g.graph")
@@ -338,6 +339,20 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                 });
             }
 
+            function resetButtons() {
+                cases100 = false;
+                document.getElementById("percap").checked = false;
+                per100k = false;
+                document.getElementById("Hdays").checked = false;
+
+                start_date = null;
+                end_date = null;
+                document.getElementById("startdate").value = "";
+                document.getElementById("enddate").value = "";
+
+                updateGraphs()
+            }
+
             // Update the line graphs when a country is picked.
             function updateGraphs() {
                 var t = d3.transition().duration(750)
@@ -363,6 +378,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                     // disable start date button
                     document.getElementById("datebtn").disabled = false;
                     document.getElementById("startdate").readOnly = false;
+                    document.getElementById("enddate").readOnly = false;
                     // Check if a start date is set
                     start_date = d3.select("#startdate").property("value")+"/20";
                     start_date = parseDate(start_date);
