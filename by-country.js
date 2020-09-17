@@ -400,20 +400,24 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                 death_chg4graph.select(".y").transition(t).call(yAxis_deaths_chg);
 
                 var max_count_pct = d3.max(deathsFilter, function(d) { return d.count_pct; });
-                y_counts_pct.domain([-100, max_count_pct ? max_count_pct : 100 ]);
+                var min_count_pct = d3.min(deathsFilter, function(d) { return d.count_pct; });
+                y_counts_pct.domain([min_count_pct ? min_count_pct : -100, max_count_pct ? max_count_pct : 100 ]);
                 yAxis_counts_pct.scale(y_counts_pct);
                 cases_pctgraph.select(".y").transition(t).call(yAxis_counts_pct);
                 var max_deaths_pct = d3.max(deathsFilter, function(d) { return d.deaths_pct; });
-                y_deaths_pct.domain([-100, max_deaths_pct ? max_deaths_pct : 100]);
+                var min_deaths_pct = d3.min(deathsFilter, function(d) { return d.deaths_pct; });
+                y_deaths_pct.domain([min_deaths_pct ? min_deaths_pct : -100, max_deaths_pct ? max_deaths_pct : 100]);
                 yAxis_deaths_pct.scale(y_deaths_pct);
                 death_pctgraph.select(".y").transition(t).call(yAxis_deaths_pct);
 
                 var max_count_pct4 = d3.max(deathsFilter, function(d) { return d.count_pct4; });
-                y_counts_pct4.domain([-100, max_count_pct4 ? max_count_pct4 : 100]);
+                var min_count_pct4 = d3.min(deathsFilter, function(d) { return d.count_pct4; });
+                y_counts_pct4.domain([min_count_pct4 ? min_count_pct4 : -100, max_count_pct4 ? max_count_pct4 : 100]);
                 yAxis_counts_pct4.scale(y_counts_pct4);
                 cases_pct4graph.select(".y").transition(t).call(yAxis_counts_pct4);
                 var max_deaths_pct4 = d3.max(deathsFilter, function(d) { return d.deaths_pct4; });
-                y_deaths_pct4.domain([-100, max_deaths_pct4 ? max_deaths_pct4 : 100]);
+                var min_deaths_pct4 = d3.min(deathsFilter, function(d) { return d.deaths_pct4; });
+                y_deaths_pct4.domain([min_deaths_pct4 ? min_deaths_pct4 : -100, max_deaths_pct4 ? max_deaths_pct4 : 100]);
                 yAxis_deaths_pct4.scale(y_deaths_pct4);
                 death_pct4graph.select(".y").transition(t).call(yAxis_deaths_pct4);
 
