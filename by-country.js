@@ -340,10 +340,10 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
             }
 
             function resetButtons() {
-                cases100 = false;
                 document.getElementById("percap").checked = false;
-                per100k = false;
                 document.getElementById("Hdays").checked = false;
+                cases100 = d3.select("#Hdays").property("checked");
+                per100k = d3.select("#percap").property("checked");
 
                 start_date = null;
                 end_date = null;
