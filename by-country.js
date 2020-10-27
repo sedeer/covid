@@ -413,7 +413,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                 yAxis_deaths.scale(y_deaths);
                 death_graph.select(".y").transition(t).call(yAxis_deaths);
 
-                y_counts_chg.domain([0, d3.max(countsFilter, function(d) { return per100k ? d.count_100k : d.count_change; })]);
+                y_counts_chg.domain([0, d3.max(countsFilter, function(d) { return per100k ? d.count_change_100k : d.count_change; })]);
                 yAxis_counts_chg.scale(y_counts_chg);
                 y_deaths_chg.domain([0, d3.max(deathsFilter, function(d) { return per100k ? d.deaths_change_100k : d.deaths_change; })]);
                 yAxis_deaths_chg.scale(y_deaths_chg);
