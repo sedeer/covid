@@ -415,7 +415,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
 
                 y_counts_chg.domain([0, d3.max(countsFilter, function(d) { return per100k ? d.count_100k : d.count_change; })]);
                 yAxis_counts_chg.scale(y_counts_chg);
-                y_deaths_chg.domain([0, d3.max(deathsFilter, function(d) { return per100k = d.deaths_change_100k : d.deaths_change; })]);
+                y_deaths_chg.domain([0, d3.max(deathsFilter, function(d) { return per100k ? d.deaths_change_100k : d.deaths_change; })]);
                 yAxis_deaths_chg.scale(y_deaths_chg);
                 cases_chggraph.select(".y").transition(t).call(yAxis_counts_chg);
                 death_chggraph.select(".y").transition(t).call(yAxis_deaths_chg);
