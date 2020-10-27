@@ -572,7 +572,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                                 div.transition()
                                     .duration(200)
                                     .style("opacity", 0.9);
-                                div	.html(d.country + "<br>" + d.count_change + " more cases on" + "<br>" + formatDate(d.date))
+                                div	.html(d.country + "<br>" + (per100k ? d.count_change_100k + " more cases per 100k" : d.count_change + " more cases") + " on <br>" + formatDate(d.date))
                                     .style("left", (d3.event.pageX) + "px")
                                     .style("top", (d3.event.pageY - 28) + "px");
                                 })
@@ -676,7 +676,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                                 div.transition()
                                     .duration(200)
                                     .style("opacity", 0.9);
-                                div	.html(d.country + "<br>" + d.deaths_change + " more deaths on" + "<br>" + formatDate(d.date))
+                                div	.html(d.country + "<br>" + (per100k ? d.deaths_change_100k + " more deaths per 100k" : d.deaths_change + " more deaths") + " on<br>" + formatDate(d.date))
                                     .style("left", (d3.event.pageX) + "px")
                                     .style("top", (d3.event.pageY - 28) + "px");
                                 })
