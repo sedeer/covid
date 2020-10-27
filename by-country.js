@@ -567,7 +567,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                             .attr("fill",countrycolors(selected_countries.indexOf(d.country)%10))
                             .attr("id",d.country.replace(" ", "_")+"-count")
                             .attr("cx", x(cases100 ? d.days100 : d.date))
-                            .attr("cy", y_counts_chg(d.count_change))
+                            .attr("cy", y_counts_chg(per100k ? d.count_change_100k : d.count_change))
                             .on("mouseover", function(e) {
                                 div.transition()
                                     .duration(200)
@@ -671,7 +671,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                             .attr("fill",countrycolors(selected_countries.indexOf(d.country)%10))
                             .attr("id",d.country.replace(" ", "_")+"-death")
                             .attr("cx", x(cases100 ? d.days100 : d.date))
-                            .attr("cy", y_deaths_chg(d.deaths_change))
+                            .attr("cy", y_deaths_chg(per100k ? d.deaths_change_100k : d.deaths_change))
                             .on("mouseover", function(e) {
                                 div.transition()
                                     .duration(200)
