@@ -156,19 +156,19 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
     var countchgline = d3.svg.line()
         .interpolate("cardinal")
         .x(function(d) { return x(cases100 ? d.days100 : d.date); })
-        .y(function(d) { return y_counts_chg(d.count_change); });
+        .y(function(d) { return y_counts_chg(per100k ? d.count_change_100k : d.count_change); });
     var deathchgline = d3.svg.line()
         .interpolate("cardinal")
         .x(function(d) { return x(cases100 ? d.days100 : d.date); })
-        .y(function(d) { return y_deaths_chg(d.deaths_change); });
+        .y(function(d) { return y_deaths_chg(per100k ? d.deaths_change_100k : d.deaths_change); });
     var countchg4line = d3.svg.line()
         .interpolate("cardinal")
         .x(function(d) { return x(cases100 ? d.days100 : d.date); })
-        .y(function(d) { return y_counts_chg(d.count_change_avg); });
+        .y(function(d) { return y_counts_chg(per100k ? d.count_change_avg_100k : d.count_change_avg); });
     var deathchg4line = d3.svg.line()
         .interpolate("cardinal")
         .x(function(d) { return x(cases100 ? d.days100 : d.date); })
-        .y(function(d) { return y_deaths_chg(d.deaths_change_avg); });
+        .y(function(d) { return y_deaths_chg(per100k ? d.deaths_change_avg_100k : d.deaths_change_avg); });
     var countpctline = d3.svg.line()
         .x(function(d) { return x(cases100 ? d.days100 : d.date); })
         .y(function(d) { return y_counts_pct(d.count_pct); });
@@ -413,9 +413,9 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                 yAxis_deaths.scale(y_deaths);
                 death_graph.select(".y").transition(t).call(yAxis_deaths);
 
-                y_counts_chg.domain([0, d3.max(countsFilter, function(d) { return d.count_change; })]);
+                y_counts_chg.domain([0, d3.max(countsFilter, function(d) { return per100k ? d.count_100k : d.count_change; })]);
                 yAxis_counts_chg.scale(y_counts_chg);
-                y_deaths_chg.domain([0, d3.max(deathsFilter, function(d) { return d.deaths_change; })]);
+                y_deaths_chg.domain([0, d3.max(deathsFilter, function(d) { return per100k = d.deaths_change_100k : d.deaths_change; })]);
                 yAxis_deaths_chg.scale(y_deaths_chg);
                 cases_chggraph.select(".y").transition(t).call(yAxis_counts_chg);
                 death_chggraph.select(".y").transition(t).call(yAxis_deaths_chg);
