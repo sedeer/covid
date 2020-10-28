@@ -38,9 +38,9 @@ counts_df['count_change_100k']= counts_df["count_change"].mul(100000).div(counts
 counts_df['count_change_avg']=counts_df['count_change'].rolling(4).mean()
 counts_df['count_change_avg_100k']= counts_df["count_change_avg"].mul(100000).div(counts_df["population"]).round(4)
 counts_df['deaths_change']=counts_df['deaths'].groupby(counts_df['country']).diff()
-counts_df['death_change_100k']= counts_df["deaths_change"].mul(100000).div(counts_df["population"]).round(4)
+counts_df['deaths_change_100k']= counts_df["deaths_change"].mul(100000).div(counts_df["population"]).round(4)
 counts_df['deaths_change_avg']=counts_df['deaths_change'].rolling(4).mean()
-counts_df['death_change_avg_100k']= counts_df["deaths_change_avg"].mul(100000).div(counts_df["population"]).round(4)
+counts_df['deaths_change_avg_100k']= counts_df["deaths_change_avg"].mul(100000).div(counts_df["population"]).round(4)
 
 # Calculate percent changes
 counts_df['count_pct']=counts_df['count_change'].groupby(counts_df['country']).pct_change()*100
