@@ -21,7 +21,7 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
     // Parser and formatters
     var parseUSDate = d3.time.format("%m/%d/%y").parse;
     var parseDate = d3.time.format("%d/%m/%y").parse;
-    var formatDate = d3.time.format("%d/%m");
+    var formatDate = d3.time.format("%d/%m/%y");
     var loglabel = d3.format(",.2r");
 
     // Map
@@ -384,9 +384,9 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                     document.getElementById("startdate").readOnly = false;
                     document.getElementById("enddate").readOnly = false;
                     // Check if a start date is set
-                    start_date = d3.select("#startdate").property("value")+"/20";
+                    start_date = d3.select("#startdate").property("value");
                     start_date = parseDate(start_date);
-                    end_date = d3.select("#enddate").property("value")+"/20";
+                    end_date = d3.select("#enddate").property("value");
                     end_date = parseDate(end_date);
                     if (start_date >= d3.min(data, function(d){return d.date}) && start_date <= d3.max(data, function(d){return d.date})) {
                         dataFilter = dataFilter.filter(function(d){return d.date >= start_date })  
