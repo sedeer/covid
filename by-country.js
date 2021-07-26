@@ -337,10 +337,16 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                     .style("opacity", 0);
             }
 
-            function recolorCountries() {
-                selected_countries.forEach(function (countryname) {
-                    d3.select("#"+countryname.replace(" ", "_")).style("fill",countrycolors(selected_countries.indexOf(countryname)%10));
-                });
+            function recolorCountries(clear=false) {
+                if (clear) {
+                    selected_countries.forEach(function (countryname) {
+                        d3.select("#"+countryname.replace(" ", "_")).style("fill","#ffffff");
+                    });
+                } else {
+                    selected_countries.forEach(function (countryname) {
+                        d3.select("#"+countryname.replace(" ", "_")).style("fill",countrycolors(selected_countries.indexOf(countryname)%10));
+                    });
+                }
             }
 
             function resetButtons() {
@@ -353,6 +359,9 @@ var drawMap = function(dataset,map_target,linear_target,log_target,pct_target,pc
                 end_date = null;
                 document.getElementById("startdate").value = "";
                 document.getElementById("enddate").value = "";
+
+                recolorCountries(true);
+                selected_countries = [];
 
                 updateGraphs()
             }
